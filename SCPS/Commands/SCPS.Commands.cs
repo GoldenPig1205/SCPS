@@ -45,5 +45,4 @@ namespace SCPS.Commands
 
 		public bool SanitizeResponse { get; } = true;
 	}
-	}
 }
