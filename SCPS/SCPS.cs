@@ -33,12 +33,12 @@ namespace SCPS
 
     public class Gtool 
     {
-        public void HideFromList(ReferenceHub PlayerDummy)
+        public static void HideFromList(ReferenceHub PlayerDummy)
         {
             PlayerDummy.authManager.NetworkSyncedUserId = "ID_Dedicated";
         }
 
-        public void Rotate(ReferenceHub npc, Vector3 vector3)
+        public static void Rotate(ReferenceHub npc, Vector3 vector3)
         {
             Vector3 direction = vector3;
             Quaternion quat = Quaternion.LookRotation(direction, Vector3.up);
@@ -113,10 +113,13 @@ namespace SCPS
     public class SCPS : Plugin<Config>
     {
         public static SCPS Instance;
-        public Gtool gtool;
 
         public Player player = null;
         public List<Chracters> Chracters = new List<Chracters>();
+
+        public bool sync = false;
+        public int Battery = 100;
+        public List<string> Using = new List<string>();
 
         public override void OnEnabled()
         {
@@ -131,6 +134,9 @@ namespace SCPS
             Exiled.Events.Handlers.Player.ActivatingWorkstation += OnActivatingWorkstation;
 
             Exiled.Events.Handlers.Scp079.Pinging += OnPinging;
+            Exiled.Events.Handlers.Scp079.InteractingTesla += OnInteractingTesla;
+            Exiled.Events.Handlers.Scp079.TriggeringDoor += OnTriggeringDoor;
+            Exiled.Events.Handlers.Scp079.ElevatorTeleporting += OnElevatorTeleporting;
         }
 
         public override void OnDisabled()
@@ -144,6 +150,9 @@ namespace SCPS
             Exiled.Events.Handlers.Player.ActivatingWorkstation -= OnActivatingWorkstation;
 
             Exiled.Events.Handlers.Scp079.Pinging -= OnPinging;
+            Exiled.Events.Handlers.Scp079.InteractingTesla -= OnInteractingTesla;
+            Exiled.Events.Handlers.Scp079.TriggeringDoor -= OnTriggeringDoor;
+            Exiled.Events.Handlers.Scp079.ElevatorTeleporting -= OnElevatorTeleporting;
 
             Instance = null;
         }
@@ -162,13 +171,32 @@ namespace SCPS
             Round.IsLocked = true;
             Round.Start();
 
-            Window.List.ToList().ForEach(x => x.BreakWindow());
+            foreach (var window in Window.List)
+            {
+                if (window.Room.name == "HCZ_079" && (window.Base.name == "Glass (1)" || window.Base.name == "Glass (2)"))
+                {
+                    window.IsBroken = true;
+
+                    foreach (var door in window.Room.Doors)
+                    {
+                        door.Unlock();
+                        door.IsOpen = true;
+                    }
+                }
+            }
+
+            foreach (var room in Room.List)
+            {
+                room.AreLightsOff = true;
+                room.Doors.ToList().ForEach(x => x.IsOpen = true);
+            }
         }
 
-        public void OnRoundStarted()
+        public async void OnRoundStarted()
         {
             player.Position = new Vector3(68.2181f, -1002.403f, 54.75781f);
             player.EnableEffect(EffectType.Ensnared);
+            Map.TurnOffAllLights(99999);
 
             ReferenceHub PlayerDummy = Gtool.Spawn(RoleTypeId.ClassD, new Vector3(46.32286f, 0.91f, 64.23f));
 
@@ -176,8 +204,20 @@ namespace SCPS
             { 
                 Chracters chracters = new Chracters { Name = "PlayerDummy", npc = PlayerDummy }; 
                 Chracters.Add(chracters); 
-                gtool.HideFromList(PlayerDummy); 
+                Gtool.HideFromList(PlayerDummy); 
             });
+
+
+            while (true)
+            {
+                foreach (var scp in Player.List.Where(x => x.Role.Type == RoleTypeId.Scp079))
+                {
+                    if (scp.Role is Exiled.API.Features.Roles.Scp079Role scp079)
+                        scp079.Energy = Battery;
+                }
+
+                await Task.Delay(100);
+            }
         }
 
         public void OnRoundEnded(Exiled.Events.EventArgs.Server.RoundEndedEventArgs ev)
@@ -194,7 +234,6 @@ namespace SCPS
         public void OnFlippingCoin(Exiled.Events.EventArgs.Player.FlippingCoinEventArgs ev)
         {
             ServerConsole.AddLog($"{ev.Player.Nickname}의 위치 : new Vector3({ev.Player.Position.x}f, {ev.Player.Position.y}f, {ev.Player.Position.z}f)", ConsoleColor.DarkMagenta);
-            ServerConsole.AddLog($"{ev.Player.Nickname}의 방향 : new Quaternion({ev.Player.Rotation.x}f, {ev.Player.Rotation.y}f, {ev.Player.Rotation.z}f, {ev.Player.Rotation.w}f)", ConsoleColor.Blue);
         }
 
         public void OnActivatingWorkstation(Exiled.Events.EventArgs.Player.ActivatingWorkstationEventArgs ev)
@@ -205,7 +244,6 @@ namespace SCPS
 
             ReferenceHub pd = Chracters.Find(x => x.Name == "PlayerDummy").npc;
             pd.TryOverridePosition(new Vector3(68.2181f, -1002.403f, 54.75781f), Vector3.zero);
-            gtool.Rotate(pd, new Vector3(0, 90, 0));
         }
 
         public void OnPinging(Exiled.Events.EventArgs.Scp079.PingingEventArgs ev)
@@ -213,11 +251,25 @@ namespace SCPS
             ReferenceHub pd = Chracters.Find(x => x.Name == "PlayerDummy").npc;
             pd.TryOverridePosition(new Vector3(46.32286f, 0.91f, 64.23f), Vector3.zero);
 
-            player.Role.Set(PlayerRoles.RoleTypeId.ClassD);
+            player.Role.Set(RoleTypeId.ClassD);
             player.Position = new Vector3(68.2181f, -1002.403f, 54.75781f);
-            player.EnableEffect(Exiled.API.Enums.EffectType.Ensnared);
+            player.EnableEffect(EffectType.Ensnared);
         }
 
+        public void OnElevatorTeleporting(Exiled.Events.EventArgs.Scp079.ElevatorTeleportingEventArgs ev)
+        {
+            ev.IsAllowed = false;
+        }
+
+        public void OnInteractingTesla(Exiled.Events.EventArgs.Scp079.InteractingTeslaEventArgs ev)
+        {
+            ev.IsAllowed = false;
+        }
+
+        public void OnTriggeringDoor(Exiled.Events.EventArgs.Scp079.TriggeringDoorEventArgs ev)
+        {
+            ev.IsAllowed = false;
+        }
     }
 }
 
