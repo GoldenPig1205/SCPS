@@ -118,8 +118,9 @@ namespace SCPS
         public List<Chracters> Chracters = new List<Chracters>();
 
         public bool sync = false;
-        public int Battery = 100;
-        public List<string> Using = new List<string>();
+        public bool IsEnd = false;
+        public float Battery = 100;
+        public List<string> Using = new List<string>() { "RedLightOnSR" };
 
         public override void OnEnabled()
         {
@@ -132,6 +133,8 @@ namespace SCPS
             Exiled.Events.Handlers.Player.Left += OnLeft;
             Exiled.Events.Handlers.Player.FlippingCoin += OnFlippingCoin;
             Exiled.Events.Handlers.Player.ActivatingWorkstation += OnActivatingWorkstation;
+            Exiled.Events.Handlers.Player.SearchingPickup += OnSearchingPickup;
+            Exiled.Events.Handlers.Player.InteractingDoor += OnInteractingDoor;
 
             Exiled.Events.Handlers.Scp079.Pinging += OnPinging;
             Exiled.Events.Handlers.Scp079.InteractingTesla += OnInteractingTesla;
@@ -148,6 +151,8 @@ namespace SCPS
             Exiled.Events.Handlers.Player.Left -= OnLeft;
             Exiled.Events.Handlers.Player.FlippingCoin -= OnFlippingCoin;
             Exiled.Events.Handlers.Player.ActivatingWorkstation -= OnActivatingWorkstation;
+            Exiled.Events.Handlers.Player.SearchingPickup -= OnSearchingPickup;
+            Exiled.Events.Handlers.Player.InteractingDoor -= OnInteractingDoor;
 
             Exiled.Events.Handlers.Scp079.Pinging -= OnPinging;
             Exiled.Events.Handlers.Scp079.InteractingTesla -= OnInteractingTesla;
@@ -159,17 +164,16 @@ namespace SCPS
 
         public async void OnWaitingForPlayers()
         {
+            Map.CleanAllItems();
             Server.ExecuteCommand("/mp load SCPS");
 
             while (Player.List.Count < 1)
                 await Task.Delay(1000);
 
             player = Player.List.ToList()[0];
-
-            Map.CleanAllItems();
-
             Round.IsLocked = true;
             Round.Start();
+            Server.ExecuteCommand($"/decontamination disable");
 
             foreach (var window in Window.List)
             {
@@ -200,14 +204,18 @@ namespace SCPS
 
             ReferenceHub PlayerDummy = Gtool.Spawn(RoleTypeId.ClassD, new Vector3(46.32286f, 0.91f, 64.23f));
 
-            Timing.CallDelayed(1f, () => 
+            Timing.CallDelayed(0.3f, () => 
             { 
                 Chracters chracters = new Chracters { Name = "PlayerDummy", npc = PlayerDummy }; 
                 Chracters.Add(chracters); 
-                Gtool.HideFromList(PlayerDummy); 
+                Gtool.HideFromList(PlayerDummy);
             });
 
+            await Task.WhenAll(Sync079andBattery(), Timer(), UsingBattery(), ShowBattery());
+        }
 
+        public async Task Sync079andBattery()
+        {
             while (true)
             {
                 foreach (var scp in Player.List.Where(x => x.Role.Type == RoleTypeId.Scp079))
@@ -218,6 +226,79 @@ namespace SCPS
 
                 await Task.Delay(100);
             }
+        }
+
+        public async Task ShowBattery()
+        {
+            while (!IsEnd)
+            {
+                string UsageBar = "";
+
+                foreach (var _ in Using)
+                    UsageBar += "▮";
+
+                player.ShowHint($"\n\n\n\n\n\n\n\n<align=left><size=25>Power Left : {(int)Battery}%\nUsage : {UsageBar}</size></align>", 1f);
+                await Task.Delay(500);
+            }
+        }
+
+        public async Task UsingBattery()
+        {
+            while (true)
+            {
+                if (Battery < 0.3f)
+                {
+                    foreach (var obj in MapEditorReborn.API.API.SpawnedObjects)
+                    {
+                        if (obj.name == "CustomSchematic-rlight")
+                            obj.Destroy();
+                    }
+
+                    if (player.Role.Type == RoleTypeId.Scp079)
+                    {
+                        ReferenceHub pd = Chracters.Find(x => x.Name == "PlayerDummy").npc;
+                        pd.TryOverridePosition(new Vector3(46.32286f, 0.91f, 64.23f), Vector3.zero);
+
+                        player.Role.Set(RoleTypeId.ClassD);
+                        player.Position = new Vector3(68.2181f, -1002.403f, 54.75781f);
+                        player.EnableEffect(EffectType.Ensnared);
+
+                        Using.Remove("CCTV");
+                    }
+
+                    foreach (var door in Exiled.API.Features.Doors.BreakableDoor.List)
+                    {
+                        door.ChangeLock(DoorLockType.Regular079);
+                        door.IsOpen = true;
+                    }
+
+                    player.EnableEffect(EffectType.Scanned);
+
+                    break;
+                }
+
+                Battery -= Using.Count * 0.0275f;
+                await Task.Delay(100);
+            }
+        }
+
+        public async Task Timer()
+        {
+            player.Broadcast(45, "<b><size=40>12AM</size></b>");
+            await Task.Delay(45000);
+
+            for (int t=1; t<6; t++)
+            {
+                player.Broadcast(45, $"<b><size=40>{t}AM</size></b>");
+                await Task.Delay(45000);
+            }
+
+            IsEnd = true;
+            player.ShowHint("<size=150><b>5AM</b></size>\n\n\n\n\n\n\n\n\n\n", 5);
+            await Task.Delay(3000);
+            player.ShowHint("<size=150><b>6AM</b></size>\n\n\n\n\n\n\n\n\n\n", 10);
+            await Task.Delay(5000);
+            Round.IsLocked = false;
         }
 
         public void OnRoundEnded(Exiled.Events.EventArgs.Server.RoundEndedEventArgs ev)
@@ -240,10 +321,50 @@ namespace SCPS
         {
             ev.IsAllowed = false;
 
-            ev.Player.Role.Set(RoleTypeId.Scp079);
+            if (!(Battery < 0.3f))
+            {
+                ev.Player.Role.Set(RoleTypeId.Scp079);
 
-            ReferenceHub pd = Chracters.Find(x => x.Name == "PlayerDummy").npc;
-            pd.TryOverridePosition(new Vector3(68.2181f, -1002.403f, 54.75781f), Vector3.zero);
+                ReferenceHub pd = Chracters.Find(x => x.Name == "PlayerDummy").npc;
+                pd.TryOverridePosition(new Vector3(68.2181f, -1002.403f, 54.75781f), Vector3.zero);
+                Gtool.Rotate(pd, new Vector3(1, -2, 2));
+
+                Using.Add("CCTV");
+            }
+        }
+
+        public async void OnSearchingPickup(Exiled.Events.EventArgs.Player.SearchingPickupEventArgs ev)
+        {
+            if (ev.Pickup.Type == ItemType.KeycardScientist)
+            {
+                if (!Using.Contains("Light1"))
+                {
+                    Using.Add("Light1");
+                    await Task.Delay(2000);
+                    Using.Remove("Light1");
+                }
+            }
+
+            else if (ev.Pickup.Type == ItemType.KeycardResearchCoordinator)
+            {
+                if (!Using.Contains("Light2"))
+                {
+                    Using.Add("Light2");
+                    await Task.Delay(2000);
+                    Using.Remove("Light2");
+                }
+            }
+        }
+
+        public void OnInteractingDoor(Exiled.Events.EventArgs.Player.InteractingDoorEventArgs ev)
+        {
+            if (!(Battery < 0.3f))
+            {
+                if (ev.Door.IsOpen)
+                    Using.Add("DoorClose");
+                else
+                    Using.Remove("DoorClose");
+            }
         }
 
         public void OnPinging(Exiled.Events.EventArgs.Scp079.PingingEventArgs ev)
@@ -254,6 +375,8 @@ namespace SCPS
             player.Role.Set(RoleTypeId.ClassD);
             player.Position = new Vector3(68.2181f, -1002.403f, 54.75781f);
             player.EnableEffect(EffectType.Ensnared);
+
+            Using.Remove("CCTV");
         }
 
         public void OnElevatorTeleporting(Exiled.Events.EventArgs.Scp079.ElevatorTeleportingEventArgs ev)

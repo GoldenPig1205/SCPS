@@ -95,3 +95,4 @@ C:\Users\GoldenPig1205\Desktop\GoldenPig1205\Visual Studio 2019\SCPS\obj\Debug\S
 C:\Users\GoldenPig1205\Desktop\GoldenPig1205\Visual Studio 2019\SCPS\obj\Debug\SCPS.csproj.CopyComplete
 C:\Users\GoldenPig1205\Desktop\GoldenPig1205\Visual Studio 2019\SCPS\obj\Debug\SCPS.dll
 C:\Users\GoldenPig1205\Desktop\GoldenPig1205\Visual Studio 2019\SCPS\obj\Debug\SCPS.pdb
+C:\Users\GoldenPig1205\Desktop\GoldenPig1205\Visual Studio 2019\SCPS\bin\Debug\MapEditorReborn.dll

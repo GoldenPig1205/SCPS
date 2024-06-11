@@ -2,46 +2,52 @@
 using System.Diagnostics.CodeAnalysis;
 using CommandSystem;
 using Exiled.API.Features;
+using UnityEngine;
 
 namespace SCPS.Commands
 {
-	[CommandHandler(typeof(ClientCommandHandler))]
-	public class Test : ICommand
+	[CommandHandler(typeof(RemoteAdminCommandHandler))]
+	public class Rotate : ICommand
 	{
 		public bool Execute(ArraySegment<string> arguments, ICommandSender sender, [UnscopedRef] out string response)
 		{
 			bool result;
 
-			try
-			{
-				if (arguments.At(0) != null)
-				{
-					response = $"테스트 내용 : {arguments.At(0)}";
-
-					result = true;
-				}
-				else
-				{
-					response = $"안타깝네요.";
-
-					result = true;
-				}
-			}
-			catch (Exception ex)
-			{
-				response = $"오류났습니다. ㅅㄱ \n{ex}";
-
-				result = false;
-			}
+			Gtool.Rotate(SCPS.Instance.Chracters[0].npc, new Vector3(float.Parse(arguments.At(0)), float.Parse(arguments.At(1)), float.Parse(arguments.At(2))));
+			response = "성공";
+			result = true;
 
 			return result;
 		}
 
-		public string Command { get; } = "test";
+		public string Command { get; } = "rotate";
 
-		public string[] Aliases { get; } = Array.Empty<string>();
+		public string[] Aliases { get; } = { "rot", "rt" };
 
-		public string Description { get; } = "돼지가 테스트용으로 만든 명령어";
+		public string Description { get; } = "rot <x> <y> <z>";
+
+		public bool SanitizeResponse { get; } = true;
+	}
+
+	[CommandHandler(typeof(RemoteAdminCommandHandler))]
+	public class Battery : ICommand
+	{
+		public bool Execute(ArraySegment<string> arguments, ICommandSender sender, [UnscopedRef] out string response)
+		{
+			bool result;
+
+			SCPS.Instance.Battery = int.Parse(arguments.At(0));
+			response = "성공";
+			result = true;
+
+			return result;
+		}
+
+		public string Command { get; } = "battery";
+
+		public string[] Aliases { get; } = { "bty" };
+
+		public string Description { get; } = "bty <ammount>";
 
 		public bool SanitizeResponse { get; } = true;
 	}
