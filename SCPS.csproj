@@ -111,6 +111,10 @@
     <Compile Include="SCPS\Configs\Config.cs" />
     <Compile Include="SCPS\SCPS.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="SCPS\Utils\Chracters.cs" />
+    <Compile Include="SCPS\Utils\Extensions.cs" />
+    <Compile Include="SCPS\Utils\Gtool.cs" />
+    <Compile Include="SCPS\Utils\Tasks.cs" />
   </ItemGroup>
   <ItemGroup>
     <WCFMetadata Include="Connected Services\" />

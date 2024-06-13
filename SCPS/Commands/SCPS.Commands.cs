@@ -13,8 +13,8 @@ namespace SCPS.Commands
 		{
 			bool result;
 
-			Gtool.Rotate(SCPS.Instance.Chracters[0].npc, new Vector3(float.Parse(arguments.At(0)), float.Parse(arguments.At(1)), float.Parse(arguments.At(2))));
-			response = "성공";
+			Gtool.Rotate(SCPS.Instance.Chracters.Find(x => x.Name == arguments.At(0)).npc, new Vector3(float.Parse(arguments.At(1)), float.Parse(arguments.At(2)), float.Parse(arguments.At(3))));
+			response = "Success!";
 			result = true;
 
 			return result;
@@ -24,7 +24,7 @@ namespace SCPS.Commands
 
 		public string[] Aliases { get; } = { "rot", "rt" };
 
-		public string Description { get; } = "rot <x> <y> <z>";
+		public string Description { get; } = "rot <target> <x> <y> <z>";
 
 		public bool SanitizeResponse { get; } = true;
 	}
@@ -37,7 +37,7 @@ namespace SCPS.Commands
 			bool result;
 
 			SCPS.Instance.Battery = int.Parse(arguments.At(0));
-			response = "성공";
+			response = "Success!";
 			result = true;
 
 			return result;

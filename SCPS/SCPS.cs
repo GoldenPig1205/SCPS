@@ -5,111 +5,15 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-
 using Exiled.API.Features;
 using Exiled.API.Enums;
-using Exiled.API.Extensions;
-using Exiled.API.Features.Components;
-
 using UnityEngine;
-
-using CentralAuth;
-using Mirror;
-
-
 using PlayerRoles.FirstPersonControl;
 using PlayerRoles;
-
 using MEC;
-using Footprinting;
 
 namespace SCPS
 {
-    public class Chracters
-    {
-        public ReferenceHub npc;
-        public string Name;
-    }
-
-    public class Gtool 
-    {
-        public static void HideFromList(ReferenceHub PlayerDummy)
-        {
-            PlayerDummy.authManager.NetworkSyncedUserId = "ID_Dedicated";
-        }
-
-        public static void Rotate(ReferenceHub npc, Vector3 vector3)
-        {
-            Vector3 direction = vector3;
-            Quaternion quat = Quaternion.LookRotation(direction, Vector3.up);
-            FpcMouseLook mouseLook = (npc.roleManager.CurrentRole as FpcStandardRoleBase).FpcModule.MouseLook;
-            (ushort horizontal, ushort vertical) = quat.ToClientUShorts();
-            mouseLook.ApplySyncValues(horizontal, vertical);
-        }
-
-        public static ReferenceHub Spawn(RoleTypeId role, Vector3 pos)
-        {
-            GameObject gameObject = UnityEngine.Object.Instantiate<GameObject>(NetworkManager.singleton.playerPrefab);
-            ReferenceHub hub = gameObject.GetComponent<ReferenceHub>();
-            try
-            {
-                hub.roleManager.InitializeNewRole(RoleTypeId.None, RoleChangeReason.None, RoleSpawnFlags.All, null);
-            }
-            catch { }
-            int id = new RecyclablePlayerId(true).Value;
-            FakeConnection fakeConnection = new FakeConnection(id);
-            NetworkServer.AddPlayerForConnection(fakeConnection, gameObject);
-            Timing.CallDelayed(0.25f, () =>
-            {
-                try
-                {
-                    hub.roleManager.ServerSetRole(role, RoleChangeReason.RemoteAdmin, RoleSpawnFlags.All);
-                }
-                catch { }
-            });
-            Timing.CallDelayed(0.35f, () =>
-            {
-                //hub.nicknameSync.DisplayName = role.ToString();
-                hub.nicknameSync.Network_myNickSync = role.ToString();
-                string name = "ID_Dedicated";
-                hub.authManager.UserId = name;
-                hub.authManager.NetworkSyncedUserId = name;
-                hub.TryOverridePosition(pos + Vector3.up * 1.5f, Vector3.zero);
-            });
-            Npc npc = new Npc(gameObject)
-            {
-                IsNPC = true,
-            };
-            Player.Dictionary.Add(gameObject, npc);
-            return hub;
-        }
-    }
-
-    public static class Extensions
-    {
-        public static (ushort horizontal, ushort vertical) ToClientUShorts(this Quaternion rotation)
-        {
-            const float ToHorizontal = ushort.MaxValue / 360f;
-            const float ToVertical = ushort.MaxValue / 176f;
-
-            float fixVertical = -rotation.eulerAngles.x;
-
-            if (fixVertical < -90f)
-            {
-                fixVertical += 360f;
-            }
-            else if (fixVertical > 270f)
-            {
-                fixVertical -= 360f;
-            }
-
-            float horizontal = Mathf.Clamp(rotation.eulerAngles.y, 0f, 360f);
-            float vertical = Mathf.Clamp(fixVertical, -88f, 88f) + 88f;
-
-            return ((ushort)Math.Round(horizontal * ToHorizontal), (ushort)Math.Round(vertical * ToVertical));
-        }
-    }
-
     public class SCPS : Plugin<Config>
     {
         public static SCPS Instance;
@@ -135,6 +39,7 @@ namespace SCPS
             Exiled.Events.Handlers.Player.ActivatingWorkstation += OnActivatingWorkstation;
             Exiled.Events.Handlers.Player.SearchingPickup += OnSearchingPickup;
             Exiled.Events.Handlers.Player.InteractingDoor += OnInteractingDoor;
+            Exiled.Events.Handlers.Player.Spawned += OnSpawned;
 
             Exiled.Events.Handlers.Scp079.Pinging += OnPinging;
             Exiled.Events.Handlers.Scp079.InteractingTesla += OnInteractingTesla;
@@ -153,6 +58,7 @@ namespace SCPS
             Exiled.Events.Handlers.Player.ActivatingWorkstation -= OnActivatingWorkstation;
             Exiled.Events.Handlers.Player.SearchingPickup -= OnSearchingPickup;
             Exiled.Events.Handlers.Player.InteractingDoor -= OnInteractingDoor;
+            Exiled.Events.Handlers.Player.Spawned -= OnSpawned;
 
             Exiled.Events.Handlers.Scp079.Pinging -= OnPinging;
             Exiled.Events.Handlers.Scp079.InteractingTesla -= OnInteractingTesla;
@@ -172,7 +78,6 @@ namespace SCPS
 
             player = Player.List.ToList()[0];
             Round.IsLocked = true;
-            Round.Start();
             Server.ExecuteCommand($"/decontamination disable");
 
             foreach (var window in Window.List)
@@ -194,111 +99,41 @@ namespace SCPS
                 room.AreLightsOff = true;
                 room.Doors.ToList().ForEach(x => x.IsOpen = true);
             }
+
+            Round.Start();
         }
 
         public async void OnRoundStarted()
         {
+            player.Role.Set(RoleTypeId.FacilityGuard);
             player.Position = new Vector3(68.2181f, -1002.403f, 54.75781f);
             player.EnableEffect(EffectType.Ensnared);
             Map.TurnOffAllLights(99999);
 
-            ReferenceHub PlayerDummy = Gtool.Spawn(RoleTypeId.ClassD, new Vector3(46.32286f, 0.91f, 64.23f));
+            ReferenceHub PlayerDummy = Gtool.Spawn(RoleTypeId.FacilityGuard, new Vector3(46.32286f, 0.91f, 64.23f));
+            ReferenceHub Scp049 = Gtool.Spawn(RoleTypeId.Scp049, new Vector3(38.65023f, -806.6f, 81.84583f));
+            ReferenceHub Scp939 = Gtool.Spawn(RoleTypeId.Scp939, new Vector3(98.94531f, -998.655f, 93.27344f));
 
-            Timing.CallDelayed(0.3f, () => 
-            { 
-                Chracters chracters = new Chracters { Name = "PlayerDummy", npc = PlayerDummy }; 
-                Chracters.Add(chracters); 
-                Gtool.HideFromList(PlayerDummy);
-            });
-
-            await Task.WhenAll(Sync079andBattery(), Timer(), UsingBattery(), ShowBattery());
-        }
-
-        public async Task Sync079andBattery()
-        {
-            while (true)
+            Dictionary<ReferenceHub, string> register = new Dictionary<ReferenceHub, string>()
             {
-                foreach (var scp in Player.List.Where(x => x.Role.Type == RoleTypeId.Scp079))
-                {
-                    if (scp.Role is Exiled.API.Features.Roles.Scp079Role scp079)
-                        scp079.Energy = Battery;
-                }
+                { PlayerDummy, "PlayerDummy" }, { Scp049, "Scp049" }, { Scp939, "Scp939" }
+            };
 
-                await Task.Delay(100);
-            }
-        }
+                foreach (var reg in register)
+                    Gtool.Register(reg.Key, reg.Value);
 
-        public async Task ShowBattery()
-        {
-            while (!IsEnd)
-            {
-                string UsageBar = "";
+            Tasks.Instance = new Tasks();
 
-                foreach (var _ in Using)
-                    UsageBar += "▮";
+            await Task.WhenAll
+            (
+                Tasks.Instance.Sync079andBattery(),
+                Tasks.Instance.Timer(),
+                Tasks.Instance.UsingBattery(),
+                Tasks.Instance.ShowBattery(),
 
-                player.ShowHint($"\n\n\n\n\n\n\n\n<align=left><size=25>Power Left : {(int)Battery}%\nUsage : {UsageBar}</size></align>", 1f);
-                await Task.Delay(500);
-            }
-        }
-
-        public async Task UsingBattery()
-        {
-            while (true)
-            {
-                if (Battery < 0.3f)
-                {
-                    foreach (var obj in MapEditorReborn.API.API.SpawnedObjects)
-                    {
-                        if (obj.name == "CustomSchematic-rlight")
-                            obj.Destroy();
-                    }
-
-                    if (player.Role.Type == RoleTypeId.Scp079)
-                    {
-                        ReferenceHub pd = Chracters.Find(x => x.Name == "PlayerDummy").npc;
-                        pd.TryOverridePosition(new Vector3(46.32286f, 0.91f, 64.23f), Vector3.zero);
-
-                        player.Role.Set(RoleTypeId.ClassD);
-                        player.Position = new Vector3(68.2181f, -1002.403f, 54.75781f);
-                        player.EnableEffect(EffectType.Ensnared);
-
-                        Using.Remove("CCTV");
-                    }
-
-                    foreach (var door in Exiled.API.Features.Doors.BreakableDoor.List)
-                    {
-                        door.ChangeLock(DoorLockType.Regular079);
-                        door.IsOpen = true;
-                    }
-
-                    player.EnableEffect(EffectType.Scanned);
-
-                    break;
-                }
-
-                Battery -= Using.Count * 0.0275f;
-                await Task.Delay(100);
-            }
-        }
-
-        public async Task Timer()
-        {
-            player.Broadcast(45, "<b><size=40>12AM</size></b>");
-            await Task.Delay(45000);
-
-            for (int t=1; t<6; t++)
-            {
-                player.Broadcast(45, $"<b><size=40>{t}AM</size></b>");
-                await Task.Delay(45000);
-            }
-
-            IsEnd = true;
-            player.ShowHint("<size=150><b>5AM</b></size>\n\n\n\n\n\n\n\n\n\n", 5);
-            await Task.Delay(3000);
-            player.ShowHint("<size=150><b>6AM</b></size>\n\n\n\n\n\n\n\n\n\n", 10);
-            await Task.Delay(5000);
-            Round.IsLocked = false;
+                Tasks.Instance.Scp049(20),
+                Tasks.Instance.Scp939(20)
+            );
         }
 
         public void OnRoundEnded(Exiled.Events.EventArgs.Server.RoundEndedEventArgs ev)
@@ -367,12 +202,18 @@ namespace SCPS
             }
         }
 
+        public void OnSpawned(Exiled.Events.EventArgs.Player.SpawnedEventArgs ev)
+        {
+            if (ev.Player.Role.Type == RoleTypeId.FacilityGuard)
+                ev.Player.ClearInventory();
+        }
+
         public void OnPinging(Exiled.Events.EventArgs.Scp079.PingingEventArgs ev)
         {
             ReferenceHub pd = Chracters.Find(x => x.Name == "PlayerDummy").npc;
             pd.TryOverridePosition(new Vector3(46.32286f, 0.91f, 64.23f), Vector3.zero);
 
-            player.Role.Set(RoleTypeId.ClassD);
+            player.Role.Set(RoleTypeId.FacilityGuard);
             player.Position = new Vector3(68.2181f, -1002.403f, 54.75781f);
             player.EnableEffect(EffectType.Ensnared);
 
