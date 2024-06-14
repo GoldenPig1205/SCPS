@@ -77,11 +77,17 @@
     <Reference Include="NorthwoodLib">
       <HintPath>..\..\SCPSL\SCPSL_Data\Managed\NorthwoodLib.dll</HintPath>
     </Reference>
+    <Reference Include="NVorbis">
+      <HintPath>..\..\..\..\AppData\Roaming\EXILED\Plugins\dependencies\NVorbis.dll</HintPath>
+    </Reference>
     <Reference Include="PluginAPI">
       <HintPath>..\..\SCPSL\SCPSL_Data\Managed\PluginAPI.dll</HintPath>
     </Reference>
     <Reference Include="Pooling">
       <HintPath>..\..\SCPSL\SCPSL_Data\Managed\Pooling.dll</HintPath>
+    </Reference>
+    <Reference Include="SCPSLAudioApi">
+      <HintPath>..\..\..\..\AppData\Roaming\EXILED\Plugins\dependencies\SCPSLAudioApi.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />

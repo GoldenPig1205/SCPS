@@ -15,6 +15,18 @@ namespace SCPS
 {
     public class Gtool
     {
+        public static object GetRandomValue(List<object> list)
+        {
+            System.Random random = new System.Random();
+            int index = random.Next(0, list.Count);
+            return list[index];
+        }
+
+        public static string ConventToAudioPath(string filename)
+        {
+            return $"C:/Users/GoldenPig1205/AppData/Roaming/EXILED/Plugins/audio/{filename}.ogg";
+        }
+
         public static void HideFromList(ReferenceHub PlayerDummy)
         {
             PlayerDummy.authManager.NetworkSyncedUserId = "ID_Dedicated";

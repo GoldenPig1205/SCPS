@@ -11,6 +11,8 @@ using UnityEngine;
 using PlayerRoles.FirstPersonControl;
 using PlayerRoles;
 using MEC;
+using SCPSLAudioApi.AudioCore;
+using VoiceChat;
 
 namespace SCPS
 {
@@ -112,11 +114,23 @@ namespace SCPS
 
             ReferenceHub PlayerDummy = Gtool.Spawn(RoleTypeId.FacilityGuard, new Vector3(46.32286f, 0.91f, 64.23f));
             ReferenceHub Scp049 = Gtool.Spawn(RoleTypeId.Scp049, new Vector3(38.65023f, -806.6f, 81.84583f));
+            ReferenceHub Scp049Dummy = Gtool.Spawn(RoleTypeId.ClassD, new Vector3(38.65023f, -806.6f, 81.84583f));
             ReferenceHub Scp939 = Gtool.Spawn(RoleTypeId.Scp939, new Vector3(98.94531f, -998.655f, 93.27344f));
+            ReferenceHub PhoneGuy = Gtool.Spawn(RoleTypeId.ClassD, new Vector3(46.32286f, 0.91f, 64.23f));
+
+            Scp049Dummy.transform.localScale = Vector3.one * -0.01f;
+            foreach (Player player in Player.List)
+            {
+                Server.SendSpawnMessage.Invoke(null, new object[]
+                {
+                                Scp049Dummy.netIdentity,
+                                player.Connection
+                });
+            }
 
             Dictionary<ReferenceHub, string> register = new Dictionary<ReferenceHub, string>()
             {
-                { PlayerDummy, "PlayerDummy" }, { Scp049, "Scp049" }, { Scp939, "Scp939" }
+                { PlayerDummy, "PlayerDummy" }, { Scp049, "Scp049" }, { Scp049Dummy, "Scp049Dummy" }, { Scp939, "Scp939" }, { PhoneGuy, "PhoneGuy" }
             };
 
                 foreach (var reg in register)
@@ -126,13 +140,15 @@ namespace SCPS
 
             await Task.WhenAll
             (
+                Tasks.Instance.PhoneGuy(),
                 Tasks.Instance.Sync079andBattery(),
                 Tasks.Instance.Timer(),
                 Tasks.Instance.UsingBattery(),
                 Tasks.Instance.ShowBattery(),
 
                 Tasks.Instance.Scp049(20),
-                Tasks.Instance.Scp939(20)
+                Tasks.Instance.Scp939(20),
+                Tasks.Instance.Scp0492(20)
             );
         }
 
@@ -149,7 +165,12 @@ namespace SCPS
 
         public void OnFlippingCoin(Exiled.Events.EventArgs.Player.FlippingCoinEventArgs ev)
         {
+            ReferenceHub playerHub = ev.Player.ReferenceHub;
+            FpcStandardRoleBase playerRole = playerHub.roleManager.CurrentRole as FpcStandardRoleBase;
+            Vector3 playerForward = playerRole.transform.forward;
+
             ServerConsole.AddLog($"{ev.Player.Nickname}의 위치 : new Vector3({ev.Player.Position.x}f, {ev.Player.Position.y}f, {ev.Player.Position.z}f)", ConsoleColor.DarkMagenta);
+            ServerConsole.AddLog($"{ev.Player.Nickname}의 방향 : new Vector3({playerForward.x}f, {playerForward.y}f, {playerForward.z}f)", ConsoleColor.Blue);
         }
 
         public void OnActivatingWorkstation(Exiled.Events.EventArgs.Player.ActivatingWorkstationEventArgs ev)
@@ -195,10 +216,20 @@ namespace SCPS
         {
             if (!(Battery < 0.3f))
             {
-                if (ev.Door.IsOpen)
-                    Using.Add("DoorClose");
-                else
-                    Using.Remove("DoorClose");
+                if (ev.Door.Type == DoorType.Scp079Armory)
+                {
+                    if (ev.Door.IsOpen)
+                        Using.Add("Scp079ArmoryClose");
+                    else
+                        Using.Remove("Scp079ArmoryClose");
+                }
+                else if (ev.Door.Type == DoorType.HeavyContainmentDoor)
+                {
+                    if (ev.Door.IsOpen)
+                        Using.Add("HeavyContainmentDoorClose");
+                    else
+                        Using.Remove("HeavyContainmentDoorClose");
+                }
             }
         }
 

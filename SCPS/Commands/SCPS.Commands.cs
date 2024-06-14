@@ -6,10 +6,10 @@ using UnityEngine;
 
 namespace SCPS.Commands
 {
-	[CommandHandler(typeof(RemoteAdminCommandHandler))]
+    [CommandHandler(typeof(RemoteAdminCommandHandler))]
 	public class Rotate : ICommand
 	{
-		public bool Execute(ArraySegment<string> arguments, ICommandSender sender, [UnscopedRef] out string response)
+		public bool Execute(ArraySegment<string> arguments, ICommandSender sender, out string response)
 		{
 			bool result;
 
@@ -32,7 +32,7 @@ namespace SCPS.Commands
 	[CommandHandler(typeof(RemoteAdminCommandHandler))]
 	public class Battery : ICommand
 	{
-		public bool Execute(ArraySegment<string> arguments, ICommandSender sender, [UnscopedRef] out string response)
+		public bool Execute(ArraySegment<string> arguments, ICommandSender sender, out string response)
 		{
 			bool result;
 
