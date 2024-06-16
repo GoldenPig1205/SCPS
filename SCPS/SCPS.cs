@@ -229,7 +229,7 @@ namespace SCPS
             {
                 Player.Get(11).DisplayNickname = "Game Over";
                 Player.Get(11).Group = new UserGroup { BadgeColor = "red" };
-                Gtool.PlaySound("PhoneGuy", $"jumpscare-{Killer}", VoiceChatChannel.Intercom, 500);
+                Gtool.PlaySound("PhoneGuy", $"jumpscare-{Killer}", VoiceChatChannel.Proximity, 5000);
             }
         }
 
