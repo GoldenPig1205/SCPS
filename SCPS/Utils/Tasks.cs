@@ -23,12 +23,7 @@ namespace SCPS
 
         public async Task PhoneGuy()
         {
-            ReferenceHub pg = SCPS.Instance.Chracters.Find(x => x.Name == "PhoneGuy").npc;
-            AudioPlayerBase audio = AudioPlayerBase.Get(pg);
-            audio.BroadcastChannel = VoiceChatChannel.Radio;
-            audio.CurrentPlay = Gtool.ConventToAudioPath($"1");
-            audio.Volume = 10;
-            audio.Play(-1);
+            Gtool.PlaySound("PhoneGuy", $"phoneguy-{UnityEngine.Random.Range(1, 12)}", VoiceChatChannel.Proximity, 15);
         }
 
         public async Task Sync079andBattery()
@@ -37,7 +32,7 @@ namespace SCPS
             {
                 foreach (var scp in Player.List.Where(x => x.Role.Type == RoleTypeId.Scp079))
                 {
-                    if (scp.Role is Exiled.API.Features.Roles.Scp079Role scp079)
+                    if (scp.Role is Scp079Role scp079)
                         scp079.Energy = SCPS.Instance.Battery;
                 }
 
@@ -110,7 +105,7 @@ namespace SCPS
                     break;
                 }
 
-                SCPS.Instance.Battery -= SCPS.Instance.Using.Count * 0.0215f;
+                SCPS.Instance.Battery -= SCPS.Instance.Using.Count * 0.018f;
                 await Task.Delay(100);
             }
         }
@@ -123,15 +118,30 @@ namespace SCPS
             for (int t = 1; t < 6; t++)
             {
                 SCPS.Instance.player.Broadcast(45, $"<b><size=40>{t}AM</size></b>");
-                await Task.Delay(45000);
+                await Task.Delay(35000);
+                if (t == 5)
+                    Server.ExecuteCommand($"/server_event play_effect_mtf");
+                await Task.Delay(10000);
             }
 
-            SCPS.Instance.IsEnd = true;
-            SCPS.Instance.player.ShowHint("<size=150><b>5AM</b></size>\n\n\n\n\n\n\n\n\n\n", 5);
-            await Task.Delay(3000);
-            SCPS.Instance.player.ShowHint("<size=150><b>6AM</b></size>\n\n\n\n\n\n\n\n\n\n", 10);
-            await Task.Delay(5000);
-            Round.IsLocked = false;
+            foreach (var p in Player.List)
+            {
+                if (p != SCPS.Instance.player)
+                    p.Kill("6시!!");
+            }
+
+            if (!SCPS.Instance.IsEnd)
+            {
+                Player.Get(11).DisplayNickname = "Congratulations!";
+                Gtool.PlaySound("PhoneGuy", $"fnaf-end", VoiceChatChannel.Intercom, 30);
+
+                SCPS.Instance.IsEnd = true;
+                SCPS.Instance.player.ShowHint("<size=150><b>5AM</b></size>\n\n\n\n\n\n\n\n\n\n", 5);
+                await Task.Delay(4000);
+                SCPS.Instance.player.ShowHint("<size=150><b>6AM</b></size>\n\n\n\n\n\n\n\n\n\n", 10);
+                await Task.Delay(6000);
+                Round.IsLocked = false;
+            }
         }
 
         public async Task Scp049(int level)
@@ -162,9 +172,9 @@ namespace SCPS
                 {
                     await Task.Delay(1000);
 
-                    int rn = UnityEngine.Random.Range(level, 30);
+                    int rn = UnityEngine.Random.Range(level, Player.Get(5).CurrentRoom != Gtool.CameraRoom() ? 26 : 41);
 
-                    if (rn == 29)
+                    if (rn == 25)
                     {
                         if (Phase < (Stage.Count - 1))
                             Phase += 1;
@@ -176,6 +186,7 @@ namespace SCPS
 
                             else
                             {
+                                SCPS.Instance.Killer = "Scp049";
                                 Player.List.ToList().ForEach(x => x.Kill("SCP-049가 당신의 심장 소리를 지웠습니다."));
 
                                 SCPS.Instance.IsEnd = true;
@@ -188,10 +199,7 @@ namespace SCPS
                         {
                             Player.Get(7).DisplayNickname = Gtool.GetRandomValue(new List<object> { "I recognize your presence", "I am watching you", "where my treatment is needed", "SCP-049" }).ToString();
 
-                            AudioPlayerBase audio = AudioPlayerBase.Get(scp049dummy);
-                            audio.CurrentPlay = Gtool.ConventToAudioPath($"scp049-{UnityEngine.Random.Range(1, 8)}");
-                            audio.Volume = 20;
-                            audio.Play(-1);
+                            Gtool.PlaySound("Scp049Dummy", $"scp049-{UnityEngine.Random.Range(1, 10)}", Volume: 20);
                         }
 
                         scp049.TryOverridePosition(Stage[Phase][0], Vector3.zero);
@@ -239,9 +247,9 @@ namespace SCPS
                 {
                     await Task.Delay(1000);
 
-                    int rn = UnityEngine.Random.Range(level, 30);
+                    int rn = UnityEngine.Random.Range(level, Player.Get(9).CurrentRoom != Gtool.CameraRoom() ? 26 : 41);
 
-                    if (rn == 29)
+                    if (rn == 25)
                     {
                         if (Phase < (Stage.Count - 1))
                             Phase += 1;
@@ -253,6 +261,7 @@ namespace SCPS
 
                             else
                             {
+                                SCPS.Instance.Killer = "Scp939";
                                 Player.List.ToList().ForEach(x => x.Kill("SCP-939가 당신을 찢었습니다."));
 
                                 SCPS.Instance.IsEnd = true;
@@ -280,6 +289,10 @@ namespace SCPS
             List<List<Vector3>> Stage = new List<List<Vector3>>()
             {
                 new List<Vector3>() { new Vector3(70.16341f, -1003, 64.92969f), new Vector3(0, 0, 0) },
+                new List<Vector3>() { new Vector3(70.16341f, -1003, 64.92969f), new Vector3(0, 0, 0) },
+                new List<Vector3>() { new Vector3(70.16341f, -1003, 64.92969f), new Vector3(0, 0, 0) },
+                new List<Vector3>() { new Vector3(70.16341f, -1003, 64.92969f), new Vector3(0, 0, 0) },
+                new List<Vector3>() { new Vector3(70.16341f, -1003, 64.92969f), new Vector3(0, 0, 0) },
                 new List<Vector3>() { new Vector3(67.99935f, -1003, 65.19922f), new Vector3(0, 0, 0) },
                 new List<Vector3>() { new Vector3(68.17271f, -1003, 62.91094f), new Vector3(0, 0, 0) },
                 new List<Vector3>() { new Vector3(68.21178f, -1003, 61.27813f), new Vector3(0, 0, 0) },
@@ -293,9 +306,9 @@ namespace SCPS
             {
                 try
                 {
-                    int rn = UnityEngine.Random.Range(level, 30);
+                    int rn = UnityEngine.Random.Range(level, 26);
 
-                    if (rn == 29)
+                    if (rn == 25)
                     {
                         if (scp0492 != null)
                             scp0492.UnSpawn();
@@ -310,6 +323,7 @@ namespace SCPS
 
                             else
                             {
+                                SCPS.Instance.Killer = "Scp0492";
                                 Player.List.ToList().ForEach(x => x.Kill("SCP-049-2가 당신을 먹어치웠습니다."));
 
                                 SCPS.Instance.IsEnd = true;
@@ -321,6 +335,81 @@ namespace SCPS
                         scp0492 = Ragdoll.CreateAndSpawn(RoleTypeId.Scp0492, "SCP-049-2", "이보 전진을 위한 일보 후퇴", Stage[Phase][0], new Quaternion(0, 0, 0, 0));
                     }
                     await Task.Delay(1000);
+                }
+                catch (Exception ex)
+                {
+                    ServerConsole.AddLog(ex.ToString());
+                }
+            }
+        }
+
+        public async Task Scp106(int level)
+        {
+            if (level < 1)
+                return;
+
+            List<List<Vector3>> Stage = new List<List<Vector3>>()
+            {
+                new List<Vector3>() { new Vector3(40.04688f, -998.1693f, 140.5391f), new Vector3(-0.03144205f, 0f, 0.9995056f) },
+                new List<Vector3>() { new Vector3(29.98039f, -999.1128f, 127.9737f), new Vector3(0.01394957f, 0f, -0.9999027f) },
+                new List<Vector3>() { new Vector3(28.82031f, -999.0364f, 104.2031f), new Vector3(-0.2621398f, 0f, -0.96503f) },
+                new List<Vector3>() { new Vector3(30.3906f, -999.0403f, 75.19531f), new Vector3(0.9998474f, 0f, -0.01747239f) },
+                new List<Vector3>() { new Vector3(49.58594f, -999.0403f, 74.89063f), new Vector3(-0.7265648f, 0f, 0.687098f) },
+                new List<Vector3>() { new Vector3(63.52734f, -999.0403f, 68.98438f), new Vector3(0.9245636f, 0f, -0.3810276f) },
+                new List<Vector3>() { new Vector3(72.64843f, -999.0403f, 75.52344f), new Vector3(0.2957431f, 0f, -0.9552677f) },
+                new List<Vector3>() { new Vector3(73.71029f, -999.0436f, 60.875f), new Vector3(0.9788742f, 0f, 0.2044639f) },
+                new List<Vector3>() { new Vector3(68.17271f, -1002.372f, 54.14922f), new Vector3(-0.0401616f, 0f, 0.9991932f) },
+            };
+            int Phase = 0;
+
+            ReferenceHub scp106 = SCPS.Instance.Chracters.Find(x => x.Name == "Scp106").npc;
+
+            while (!SCPS.Instance.IsEnd)
+            {
+                try
+                {
+                    await Task.Delay(1000);
+
+                    int rn = UnityEngine.Random.Range(level, Player.Get(13).CurrentRoom != Gtool.CameraRoom() ? 35 : 60);
+
+                    if (rn == 29)
+                    {
+                        if (Phase < (Stage.Count - 1))
+                            Phase += 1;
+
+                            scp106.TryOverridePosition(Stage[Phase][0], Vector3.zero);
+                            Gtool.Rotate(scp106, Stage[Phase][1]);
+
+                        if (Phase == Stage.Count - 1)
+                            {
+                                if (!SCPS.Instance.IsFemur)
+                                {
+                                    float Countdown = 10 - (1 / 10 * level);
+
+                                    while (Countdown > 0)
+                                    {
+                                        await Task.Delay(10);
+                                        Countdown -= 0.01f;
+
+                                        if (SCPS.Instance.IsFemur)
+                                        {
+                                            Player.Get(13).DisplayNickname = "Femur Breaker";
+                                            Gtool.PlaySound("Scp106", "femur", Volume: 20);
+                                            await Task.Delay(8000);
+                                            Player.Get(13).Kill("비명 소리가 나는 곳으로..");
+                                            return;
+                                        }
+                                    }
+                                }
+
+                            SCPS.Instance.Killer = "Scp106";
+                            Player.List.ToList().ForEach(x => x.Kill("SCP-106가 당신을 초대했습니다."));
+
+                            SCPS.Instance.IsEnd = true;
+                            await Task.Delay(5000);
+                            Round.IsLocked = false;
+                        }
+                    }
                 }
                 catch (Exception ex)
                 {

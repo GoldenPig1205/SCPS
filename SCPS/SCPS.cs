@@ -13,6 +13,8 @@ using PlayerRoles;
 using MEC;
 using SCPSLAudioApi.AudioCore;
 using VoiceChat;
+using Exiled.API.Features.Items;
+using CustomPlayerEffects;
 
 namespace SCPS
 {
@@ -25,7 +27,20 @@ namespace SCPS
 
         public bool sync = false;
         public bool IsEnd = false;
+        public bool IsFemur = false;
         public float Battery = 100;
+        public string Killer = null;
+        public Dictionary<string, int> SetLevel = new Dictionary<string, int>() 
+        { 
+            { "SCP-049", 0 }, { "SCP-939", 0 }, { "SCP-049-2", 0 }, { "SCP-106", 0 }
+        };
+        public Dictionary<string, string> Method = new Dictionary<string, string>()
+        {
+            { "SCP-049", "난이도 : ★☆☆☆☆\n역병 의사라 불리는 그는 좌측 문에서 공격해올 것입니다. 가끔씩 혼잣말을 하거나 구두 소리를 냅니다. CCTV에서 빨간 점으로 표시되어 위치를 파악하기 쉽습니다." }, 
+            { "SCP-939", "난이도 : ★★☆☆☆\n소리 없는 암살자입니다. 좌측 문에서 대기할 때 숨소리가 들립니다." }, 
+            { "SCP-049-2", "난이도 : ★★☆☆☆\n앞쪽 환풍구를 통해서 당신에게 서서히 도달할 것입니다. 쓰러진 척 하는 연기가 속지 마십시오." }, 
+            { "SCP-106", "난이도 : ★★★☆☆\n천천히 당신을 향해서 접근할 것입니다. 그는 시설 벽을 뚫고 당신에게 도달할 수 있습니다. 그를 막을 유일한 방법은, 그가 당신의 사무실에서 당신을 관찰하고 있을 때, 재빨리 CCTV를 SCP-106의 격리실로 옮긴 후, 스피커(v키)를 활성화하십시오." }
+        };
         public List<string> Using = new List<string>() { "RedLightOnSR" };
 
         public override void OnEnabled()
@@ -42,11 +57,15 @@ namespace SCPS
             Exiled.Events.Handlers.Player.SearchingPickup += OnSearchingPickup;
             Exiled.Events.Handlers.Player.InteractingDoor += OnInteractingDoor;
             Exiled.Events.Handlers.Player.Spawned += OnSpawned;
+            Exiled.Events.Handlers.Player.DroppingItem += OnDroppingItem;
+            Exiled.Events.Handlers.Player.Died += OnDied;
 
             Exiled.Events.Handlers.Scp079.Pinging += OnPinging;
             Exiled.Events.Handlers.Scp079.InteractingTesla += OnInteractingTesla;
             Exiled.Events.Handlers.Scp079.TriggeringDoor += OnTriggeringDoor;
             Exiled.Events.Handlers.Scp079.ElevatorTeleporting += OnElevatorTeleporting;
+            Exiled.Events.Handlers.Scp079.ChangingSpeakerStatus += OnChangingSpeakerStatus;
+            Exiled.Events.Handlers.Scp079.ChangingCamera += OnChangingCamera;
         }
 
         public override void OnDisabled()
@@ -61,11 +80,15 @@ namespace SCPS
             Exiled.Events.Handlers.Player.SearchingPickup -= OnSearchingPickup;
             Exiled.Events.Handlers.Player.InteractingDoor -= OnInteractingDoor;
             Exiled.Events.Handlers.Player.Spawned -= OnSpawned;
+            Exiled.Events.Handlers.Player.DroppingItem -= OnDroppingItem;
+            Exiled.Events.Handlers.Player.Died -= OnDied;
 
             Exiled.Events.Handlers.Scp079.Pinging -= OnPinging;
             Exiled.Events.Handlers.Scp079.InteractingTesla -= OnInteractingTesla;
             Exiled.Events.Handlers.Scp079.TriggeringDoor -= OnTriggeringDoor;
             Exiled.Events.Handlers.Scp079.ElevatorTeleporting -= OnElevatorTeleporting;
+            Exiled.Events.Handlers.Scp079.ChangingSpeakerStatus -= OnChangingSpeakerStatus;
+            Exiled.Events.Handlers.Scp079.ChangingCamera -= OnChangingCamera;
 
             Instance = null;
         }
@@ -81,6 +104,34 @@ namespace SCPS
             player = Player.List.ToList()[0];
             Round.IsLocked = true;
             Server.ExecuteCommand($"/decontamination disable");
+
+            ReferenceHub PlayerDummy = Gtool.Spawn(RoleTypeId.FacilityGuard, new Vector3(46.32286f, 0.91f, 64.23f));
+            ReferenceHub Scp049 = Gtool.Spawn(RoleTypeId.Scp049, new Vector3(38.65023f, -806.6f, 81.84583f));
+            ReferenceHub Scp049Dummy = Gtool.Spawn(RoleTypeId.ClassD, new Vector3(38.65023f, -806.6f, 81.84583f));
+            ReferenceHub Scp939 = Gtool.Spawn(RoleTypeId.Scp939, new Vector3(98.94531f, -998.655f, 93.27344f));
+            ReferenceHub PhoneGuy = Gtool.Spawn(RoleTypeId.ClassD, new Vector3(46.32286f, 0.91f, 64.23f));
+            ReferenceHub Scp106 = Gtool.Spawn(RoleTypeId.Scp106, new Vector3(28.48828f, -998.7513f, 152.0195f));
+
+            Scp049Dummy.transform.localScale = Vector3.one * -0.01f;
+
+            foreach (Player player in Player.List)
+            {
+                Server.SendSpawnMessage.Invoke(null, new object[]
+                    {
+                        Scp049Dummy.netIdentity,
+                        player.Connection
+                    }
+                );
+            }
+
+            Dictionary<ReferenceHub, string> register = new Dictionary<ReferenceHub, string>()
+            {
+                { PlayerDummy, "PlayerDummy" }, { Scp049, "Scp049" }, { Scp049Dummy, "Scp049Dummy" }, { Scp939, "Scp939" }, { PhoneGuy, "PhoneGuy" },
+                { Scp106, "Scp106" }
+            };
+
+            foreach (var reg in register)
+                Gtool.Register(reg.Key, reg.Value);
 
             foreach (var window in Window.List)
             {
@@ -102,7 +153,36 @@ namespace SCPS
                 room.Doors.ToList().ForEach(x => x.IsOpen = true);
             }
 
-            Round.Start();
+            Player.Get(11).DisplayNickname = "BGM";
+            Gtool.PlaySound("PhoneGuy", $"bgm-{UnityEngine.Random.Range(1, 8)}", VoiceChatChannel.Intercom, 30, Loop: true);
+
+            bool broadcast = false;
+            while (Round.IsLobby)
+            {
+                if (Player.List.Count > 0)
+                {
+                    if (!broadcast)
+                    {
+                        player.Broadcast(300, "<size=20><b>당신은 <color=red>SCP-079</color>의 전력을 제한하고 게이트를 여는 등 희생을 자처했지만, 모두가 탈출한 Site-02 기지에 홀로 버려졌습니다.\n" +
+                                               "이제 남은 것은 <u><color=#FACC2E>제한된 전력</color></u>과 <i>당신의 친구 <color=red>SCP-079</color></i>, <u><color=#58ACFA>사무실</color></u> 뿐입니다.\n" +
+                                               "지원이 언제 올지는 모르지만 최대한 버텨내야만 합니다.</b></size>");
+                        broadcast = true;
+                    }
+
+                    string output = "";
+                    foreach (var item in SetLevel)
+                    {
+                        output += $"<color=red>{item.Key}</color> : {item.Value}\n";
+                    }
+                    output = output.TrimEnd('\n');
+                    player.ShowHint($"<align=left><b><size=50>A.I. Level</size></b>\n{output}</align>\n\n콘솔(~)을 열고 [.도움말] 명령어를 입력하세요.");
+                }
+
+                await Task.Delay(1000);
+            }
+
+            player.ShowHint("");
+            player.ClearBroadcasts();
         }
 
         public async void OnRoundStarted()
@@ -112,29 +192,8 @@ namespace SCPS
             player.EnableEffect(EffectType.Ensnared);
             Map.TurnOffAllLights(99999);
 
-            ReferenceHub PlayerDummy = Gtool.Spawn(RoleTypeId.FacilityGuard, new Vector3(46.32286f, 0.91f, 64.23f));
-            ReferenceHub Scp049 = Gtool.Spawn(RoleTypeId.Scp049, new Vector3(38.65023f, -806.6f, 81.84583f));
-            ReferenceHub Scp049Dummy = Gtool.Spawn(RoleTypeId.ClassD, new Vector3(38.65023f, -806.6f, 81.84583f));
-            ReferenceHub Scp939 = Gtool.Spawn(RoleTypeId.Scp939, new Vector3(98.94531f, -998.655f, 93.27344f));
-            ReferenceHub PhoneGuy = Gtool.Spawn(RoleTypeId.ClassD, new Vector3(46.32286f, 0.91f, 64.23f));
-
-            Scp049Dummy.transform.localScale = Vector3.one * -0.01f;
-            foreach (Player player in Player.List)
-            {
-                Server.SendSpawnMessage.Invoke(null, new object[]
-                {
-                                Scp049Dummy.netIdentity,
-                                player.Connection
-                });
-            }
-
-            Dictionary<ReferenceHub, string> register = new Dictionary<ReferenceHub, string>()
-            {
-                { PlayerDummy, "PlayerDummy" }, { Scp049, "Scp049" }, { Scp049Dummy, "Scp049Dummy" }, { Scp939, "Scp939" }, { PhoneGuy, "PhoneGuy" }
-            };
-
-                foreach (var reg in register)
-                    Gtool.Register(reg.Key, reg.Value);
+            Player.Get(11).DisplayNickname = "Phone Guy";
+            Player.Get(11).Kill("닉네임 동기화");
 
             Tasks.Instance = new Tasks();
 
@@ -146,9 +205,10 @@ namespace SCPS
                 Tasks.Instance.UsingBattery(),
                 Tasks.Instance.ShowBattery(),
 
-                Tasks.Instance.Scp049(20),
-                Tasks.Instance.Scp939(20),
-                Tasks.Instance.Scp0492(20)
+                Tasks.Instance.Scp049(SetLevel["SCP-049"]),
+                Tasks.Instance.Scp939(SetLevel["SCP-939"]),
+                Tasks.Instance.Scp0492(SetLevel["SCP-049-2"]),
+                Tasks.Instance.Scp106(SetLevel["SCP-106"])
             );
         }
 
@@ -161,6 +221,16 @@ namespace SCPS
         {
             if (ev.Player == player)
                 Server.ExecuteCommand("sr");
+        }
+
+        public void OnDied(Exiled.Events.EventArgs.Player.DiedEventArgs ev)
+        {
+            if (ev.Player == player)
+            {
+                Player.Get(11).DisplayNickname = "Game Over";
+                Player.Get(11).Group = new UserGroup { BadgeColor = "red" };
+                Gtool.PlaySound("PhoneGuy", $"jumpscare-{Killer}", VoiceChatChannel.Intercom, 500);
+            }
         }
 
         public void OnFlippingCoin(Exiled.Events.EventArgs.Player.FlippingCoinEventArgs ev)
@@ -239,6 +309,11 @@ namespace SCPS
                 ev.Player.ClearInventory();
         }
 
+        public void OnDroppingItem(Exiled.Events.EventArgs.Player.DroppingItemEventArgs ev)
+        {
+            ev.IsAllowed = false;
+        }
+
         public void OnPinging(Exiled.Events.EventArgs.Scp079.PingingEventArgs ev)
         {
             ReferenceHub pd = Chracters.Find(x => x.Name == "PlayerDummy").npc;
@@ -264,6 +339,17 @@ namespace SCPS
         public void OnTriggeringDoor(Exiled.Events.EventArgs.Scp079.TriggeringDoorEventArgs ev)
         {
             ev.IsAllowed = false;
+        }
+
+        public void OnChangingSpeakerStatus(Exiled.Events.EventArgs.Scp079.ChangingSpeakerStatusEventArgs ev)
+        {
+            if (IsFemur != true && ev.Scp079.Camera.Name == "106 RECONTAINMENT")
+                IsFemur = true;
+        }
+
+        public void OnChangingCamera(Exiled.Events.EventArgs.Scp079.ChangingCameraEventArgs ev)
+        {
+            ev.AuxiliaryPowerCost = 0;
         }
     }
 }

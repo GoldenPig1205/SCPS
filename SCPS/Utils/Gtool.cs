@@ -10,6 +10,9 @@ using Mirror;
 using PlayerRoles.FirstPersonControl;
 using PlayerRoles;
 using MEC;
+using SCPSLAudioApi.AudioCore;
+using VoiceChat;
+using Exiled.API.Features.Roles;
 
 namespace SCPS
 {
@@ -25,6 +28,26 @@ namespace SCPS
         public static string ConventToAudioPath(string filename)
         {
             return $"C:/Users/GoldenPig1205/AppData/Roaming/EXILED/Plugins/audio/{filename}.ogg";
+        }
+
+        public static Room CameraRoom()
+        {
+            if (SCPS.Instance.player.Role is Scp079Role scp079)
+                return scp079.Camera.Room;
+
+            else
+                return null;
+        } 
+
+        public static void PlaySound(string Name, string AudioFileName, VoiceChatChannel BroadcastChannel = VoiceChatChannel.Proximity, int Volume = 100, bool Loop = false)
+        {
+            ReferenceHub npc = SCPS.Instance.Chracters.Find(x => x.Name == Name).npc;
+            AudioPlayerBase audio = AudioPlayerBase.Get(npc);
+            audio.BroadcastChannel = BroadcastChannel;
+            audio.CurrentPlay = ConventToAudioPath(AudioFileName);
+            audio.Volume = Volume;
+            audio.Loop = Loop;
+            audio.Play(-1);
         }
 
         public static void HideFromList(ReferenceHub PlayerDummy)
