@@ -28,18 +28,20 @@ namespace SCPS
         public bool sync = false;
         public bool IsEnd = false;
         public bool IsFemur = false;
+        public bool IsCCTV = false;
         public float Battery = 100;
         public string Killer = null;
         public Dictionary<string, int> SetLevel = new Dictionary<string, int>() 
         { 
-            { "SCP-049", 0 }, { "SCP-939", 0 }, { "SCP-049-2", 0 }, { "SCP-106", 0 }
+            { "SCP-049", 0 }, { "SCP-939", 0 }, { "SCP-049-2", 0 }, { "SCP-106", 0 }, { "SCP-3114", 0 }
         };
         public Dictionary<string, string> Method = new Dictionary<string, string>()
         {
             { "SCP-049", "난이도 : ★☆☆☆☆\n역병 의사라 불리는 그는 좌측 문에서 공격해올 것입니다. 가끔씩 혼잣말을 하거나 구두 소리를 냅니다. CCTV에서 빨간 점으로 표시되어 위치를 파악하기 쉽습니다." }, 
             { "SCP-939", "난이도 : ★★☆☆☆\n소리 없는 암살자입니다. 좌측 문에서 대기할 때 숨소리가 들립니다." }, 
             { "SCP-049-2", "난이도 : ★★☆☆☆\n앞쪽 환풍구를 통해서 당신에게 서서히 도달할 것입니다. 쓰러진 척 하는 연기가 속지 마십시오." }, 
-            { "SCP-106", "난이도 : ★★★☆☆\n천천히 당신을 향해서 접근할 것입니다. 그는 시설 벽을 뚫고 당신에게 도달할 수 있습니다. 그를 막을 유일한 방법은, 그가 당신의 사무실에서 당신을 관찰하고 있을 때, 재빨리 CCTV를 SCP-106의 격리실로 옮긴 후, 스피커(v키)를 활성화하십시오." }
+            { "SCP-106", "난이도 : ★★★☆☆\n천천히 당신을 향해서 접근할 것입니다. 그는 시설 벽을 뚫고 당신에게 도달할 수 있습니다. 그를 막을 유일한 방법은, 그가 당신의 사무실에서 당신을 관찰하고 있을 때, 재빨리 CCTV를 SCP-106의 격리실로 옮긴 후, 스피커(v키)를 활성화하십시오." },
+            { "SCP-3114", "난이도 : ★★☆☆☆\n당신의 채취를 쫒아 오른쪽 환풍구로 도달할 것입니다. 그가 사무실에 나타났을 때 CCTV를 쳐다보십시오. 인간인 것을 들키지 않아야 합니다!" }
         };
         public List<string> Using = new List<string>() { "RedLightOnSR" };
 
@@ -111,6 +113,7 @@ namespace SCPS
             ReferenceHub Scp939 = Gtool.Spawn(RoleTypeId.Scp939, new Vector3(98.94531f, -998.655f, 93.27344f));
             ReferenceHub PhoneGuy = Gtool.Spawn(RoleTypeId.ClassD, new Vector3(46.32286f, 0.91f, 64.23f));
             ReferenceHub Scp106 = Gtool.Spawn(RoleTypeId.Scp106, new Vector3(28.48828f, -998.7513f, 152.0195f));
+            ReferenceHub Scp3114 = Gtool.Spawn(RoleTypeId.Scp3114, new Vector3(59f, -1004.276f, 67.01563f));
 
             Scp049Dummy.transform.localScale = Vector3.one * -0.01f;
 
@@ -127,7 +130,7 @@ namespace SCPS
             Dictionary<ReferenceHub, string> register = new Dictionary<ReferenceHub, string>()
             {
                 { PlayerDummy, "PlayerDummy" }, { Scp049, "Scp049" }, { Scp049Dummy, "Scp049Dummy" }, { Scp939, "Scp939" }, { PhoneGuy, "PhoneGuy" },
-                { Scp106, "Scp106" }
+                { Scp106, "Scp106" }, { Scp3114, "Scp3114" }
             };
 
             foreach (var reg in register)
@@ -163,9 +166,9 @@ namespace SCPS
                 {
                     if (!broadcast)
                     {
-                        player.Broadcast(300, "<size=20><b>당신은 <color=red>SCP-079</color>의 전력을 제한하고 게이트를 여는 등 희생을 자처했지만, 모두가 탈출한 Site-02 기지에 홀로 버려졌습니다.\n" +
-                                               "이제 남은 것은 <u><color=#FACC2E>제한된 전력</color></u>과 <i>당신의 친구 <color=red>SCP-079</color></i>, <u><color=#58ACFA>사무실</color></u> 뿐입니다.\n" +
-                                               "지원이 언제 올지는 모르지만 최대한 버텨내야만 합니다.</b></size>");
+                        player.Broadcast(300, "<size=20><b>당신은 <color=red>SCP-079</color>의 전력을 제한하고 게이트를 여는 등 희생을 자처했지만, 모두가 탈출한 <color=#BDBDBD>Site-02</color> 기지에 홀로 버려졌습니다.\n" +
+                                               "이제 시설에 남겨진 것은 <u><color=#FACC2E>제한된 전력</color></u>과 <i>당신의 친구 <color=red>SCP-079</color></i>, <u><color=#58ACFA>사무실</color></u> 뿐입니다.\n" +
+                                               "약속된 지원의 시간은 새벽 6시, 그때까지 최대한 버텨내야만 합니다.</b></size>");
                         broadcast = true;
                     }
 
@@ -208,7 +211,8 @@ namespace SCPS
                 Tasks.Instance.Scp049(SetLevel["SCP-049"]),
                 Tasks.Instance.Scp939(SetLevel["SCP-939"]),
                 Tasks.Instance.Scp0492(SetLevel["SCP-049-2"]),
-                Tasks.Instance.Scp106(SetLevel["SCP-106"])
+                Tasks.Instance.Scp106(SetLevel["SCP-106"]),
+                Tasks.Instance.Scp3114(SetLevel["SCP-3114"])
             );
         }
 
@@ -256,6 +260,7 @@ namespace SCPS
                 Gtool.Rotate(pd, new Vector3(1, -2, 2));
 
                 Using.Add("CCTV");
+                IsCCTV = true;
             }
         }
 
@@ -324,6 +329,7 @@ namespace SCPS
             player.EnableEffect(EffectType.Ensnared);
 
             Using.Remove("CCTV");
+            IsCCTV = false;
         }
 
         public void OnElevatorTeleporting(Exiled.Events.EventArgs.Scp079.ElevatorTeleportingEventArgs ev)

@@ -112,6 +112,7 @@ namespace SCPS
 
         public async Task Timer()
         {
+            await Task.Delay(1000);
             SCPS.Instance.player.Broadcast(45, "<b><size=40>12AM</size></b>");
             await Task.Delay(45000);
 
@@ -179,7 +180,7 @@ namespace SCPS
                         if (Phase < (Stage.Count - 1))
                             Phase += 1;
 
-                        else if (Phase == Stage.Count - 1)
+                        if (Phase == Stage.Count - 1)
                         {
                             if (SCPS.Instance.Using.Contains("Scp079ArmoryClose"))
                                 Phase = UnityEngine.Random.Range(3, 5);
@@ -254,7 +255,7 @@ namespace SCPS
                         if (Phase < (Stage.Count - 1))
                             Phase += 1;
 
-                        else if (Phase == Stage.Count - 1)
+                        if (Phase == Stage.Count - 1)
                         {
                             if (SCPS.Instance.Using.Contains("Scp079ArmoryClose"))
                                 Phase = UnityEngine.Random.Range(1, 6);
@@ -316,7 +317,7 @@ namespace SCPS
                         if (Phase < (Stage.Count - 1))
                             Phase += 1;
 
-                        else if (Phase == Stage.Count - 1)
+                        if (Phase == Stage.Count - 1)
                         {
                             if (SCPS.Instance.Using.Contains("HeavyContainmentDoorClose"))
                                 Phase = 0;
@@ -332,7 +333,7 @@ namespace SCPS
                             }
                         }
 
-                        scp0492 = Ragdoll.CreateAndSpawn(RoleTypeId.Scp0492, "SCP-049-2", "이보 전진을 위한 일보 후퇴", Stage[Phase][0], new Quaternion(0, 0, 0, 0));
+                        scp0492 = Ragdoll.CreateAndSpawn(RoleTypeId.Scp0492, "SCP-049-2", "maybe here..", Stage[Phase][0], new Quaternion(0, 0, 0, 0));
                     }
                     await Task.Delay(1000);
                 }
@@ -410,6 +411,85 @@ namespace SCPS
                             Round.IsLocked = false;
                         }
                     }
+                }
+                catch (Exception ex)
+                {
+                    ServerConsole.AddLog(ex.ToString());
+                }
+            }
+        }
+
+        public async Task Scp3114(int level)
+        {
+            if (level < 1)
+                return;
+
+            List<List<Vector3>> Stage = new List<List<Vector3>>()
+            {
+                new List<Vector3>() { new Vector3(63.16881f, -1001.9423f, 58.59989f), new Vector3(0, 0, 0) },
+                new List<Vector3>() { new Vector3(63.99303f, -1001.966f, 58.59989f), new Vector3(0, 0, 0) },
+                new List<Vector3>() { new Vector3(65.61803f, -1001.966f, 58.59989f), new Vector3(0, 0, 0) },
+                new List<Vector3>() { new Vector3(70.0786f, -1001.9736f, 54.80938f), new Vector3(0, 0, 0) },
+                new List<Vector3>() { new Vector3(70.0786f, -1001.8759f, 55.99688f), new Vector3(0, 0, 0) },
+                new List<Vector3>() { new Vector3(70.0786f, -1003.2f, 58.21563f), new Vector3(0, 0, 0) },
+                new List<Vector3>() { new Vector3(70.0786f, -1003.2f, 55.66484f), new Vector3(0, 0, 0) },
+                new List<Vector3>() { new Vector3(70.0786f, -1003.099f, 54.89531f), new Vector3(0, 0, 0) },
+                new List<Vector3>() { new Vector3(68.10631f, -1002.372f, 55.91484f), new Vector3(0.01049824f, 0f, -0.9999449f) },
+            };
+            int Phase = 0;
+
+            Ragdoll scp3114ragdoll = null;
+            ReferenceHub scp3114 = SCPS.Instance.Chracters.Find(x => x.Name == "Scp3114").npc;
+
+            while (!SCPS.Instance.IsEnd)
+            {
+                try
+                {
+                    int rn = UnityEngine.Random.Range(level, 26);
+
+                    if (rn == 25)
+                    {
+                        if (scp3114ragdoll != null)
+                            scp3114ragdoll.UnSpawn();
+
+                        if (Phase < (Stage.Count - 1))
+                            Phase += 1;
+
+                        if (Phase == Stage.Count - 1)
+                        {
+                            scp3114.TryOverridePosition(Stage[Phase][0], Vector3.zero);
+                            Gtool.Rotate(scp3114, Stage[Phase][1]);
+
+                            float Countdown = 5 - (1 / 10 * level);
+
+                            bool Know = true;
+                            while (Countdown > 0)
+                            {
+                                await Task.Delay(10);
+                                Countdown -= 0.01f;
+
+                                if (SCPS.Instance.IsCCTV)
+                                {
+                                    Phase = 0;
+                                    Know = false;
+                                    scp3114.TryOverridePosition(new Vector3(59f, -1004.276f, 67.01563f), Vector3.zero);
+                                    break;
+                                }
+                            }
+                            if (Know)
+                            {
+                                SCPS.Instance.Killer = "Scp3114";
+                                Player.List.ToList().ForEach(x => x.Kill("SCP-3114가 당신이 인간이라는 것을 알아차렸습니다."));
+
+                                SCPS.Instance.IsEnd = true;
+                                await Task.Delay(5000);
+                                Round.IsLocked = false;
+                            }
+                        }
+                        else
+                            scp3114ragdoll = Ragdoll.CreateAndSpawn(RoleTypeId.Scp3114, "SCP-3114", "It smells like a human..", Stage[Phase][0], new Quaternion(0, 0, 0, 0));
+                    }
+                    await Task.Delay(1000);
                 }
                 catch (Exception ex)
                 {
