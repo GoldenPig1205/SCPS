@@ -23,7 +23,7 @@ namespace SCPS
 
         public async Task PhoneGuy()
         {
-            Gtool.PlaySound("PhoneGuy", $"phoneguy-{UnityEngine.Random.Range(1, 12)}", VoiceChatChannel.Proximity, 15);
+            Gtool.PlaySound("PhoneGuy", $"phoneguy-{UnityEngine.Random.Range(1, 12)}", VoiceChatChannel.None, 15);
         }
 
         public async Task Sync079andBattery()
@@ -105,7 +105,7 @@ namespace SCPS
                     break;
                 }
 
-                SCPS.Instance.Battery -= SCPS.Instance.Using.Count * 0.018f;
+                SCPS.Instance.Battery -= SCPS.Instance.Using.Count * 0.021f;
                 await Task.Delay(100);
             }
         }
@@ -166,6 +166,8 @@ namespace SCPS
 
             ReferenceHub scp049 = SCPS.Instance.Chracters.Find(x => x.Name == "Scp049").npc;
             ReferenceHub scp049dummy = SCPS.Instance.Chracters.Find(x => x.Name == "Scp049Dummy").npc;
+            scp049.TryOverridePosition(Stage[0][0], Vector3.zero);
+            Gtool.Rotate(scp049, Stage[0][1]);
 
             while (!SCPS.Instance.IsEnd)
             {
@@ -241,6 +243,8 @@ namespace SCPS
             int Phase = 0;
 
             ReferenceHub scp939 = SCPS.Instance.Chracters.Find(x => x.Name == "Scp939").npc;
+            scp939.TryOverridePosition(Stage[0][0], Vector3.zero);
+            Gtool.Rotate(scp939, Stage[0][1]);
 
             while (!SCPS.Instance.IsEnd)
             {
@@ -254,6 +258,9 @@ namespace SCPS
                     {
                         if (Phase < (Stage.Count - 1))
                             Phase += 1;
+
+                        scp939.TryOverridePosition(Stage[Phase][0], Vector3.zero);
+                        Gtool.Rotate(scp939, Stage[Phase][1]);
 
                         if (Phase == Stage.Count - 1)
                         {
@@ -270,9 +277,6 @@ namespace SCPS
                                 Round.IsLocked = false;
                             }
                         }
-
-                        scp939.TryOverridePosition(Stage[Phase][0], Vector3.zero);
-                        Gtool.Rotate(scp939, Stage[Phase][1]);
                     }
                 }
                 catch (Exception ex)
@@ -445,7 +449,7 @@ namespace SCPS
             {
                 try
                 {
-                    int rn = UnityEngine.Random.Range(level, 35);
+                    int rn = UnityEngine.Random.Range(level, 30);
 
                     if (rn == 25)
                     {
@@ -460,7 +464,7 @@ namespace SCPS
                             scp3114.TryOverridePosition(Stage[Phase][0], Vector3.zero);
                             Gtool.Rotate(scp3114, Stage[Phase][1]);
 
-                            float Countdown = 5 - (1 / 10 * level);
+                            float Countdown = 3 - (1 / 10 * level);
 
                             bool Know = true;
                             while (Countdown > 0)
@@ -490,6 +494,153 @@ namespace SCPS
                             scp3114ragdoll = Ragdoll.CreateAndSpawn(RoleTypeId.Scp3114, "SCP-3114", "It smells like a human..", Stage[Phase][0], new Quaternion(0, 0, 0, 0));
                     }
                     await Task.Delay(1000);
+                }
+                catch (Exception ex)
+                {
+                    ServerConsole.AddLog(ex.ToString());
+                }
+            }
+        }
+
+        public async Task Scp096(int level)
+        {
+            if (level < 1)
+                return;
+
+            List<List<Vector3>> Stage = new List<List<Vector3>>()
+            {
+                new List<Vector3>() { new Vector3(89.92904f, -999.0436f, 132.6211f), new Vector3(0.006663424f, 0f, -0.9999778f) },
+                new List<Vector3>() { new Vector3(90.1959f, -999.04f, 120.0317f), new Vector3(1f, 0f, -2.408028E-05f) },
+                new List<Vector3>() { new Vector3(118.8789f, -999.0403f, 120.6172f), new Vector3(0.1512359f, 0f, -0.9884979f) },
+                new List<Vector3>() { new Vector3(119.7773f, -999.0403f, 94.25f), new Vector3(-0.03311848f, 0f, -0.9994514f) },
+                new List<Vector3>() { new Vector3(119.6445f, -999.0403f, 68.75781f), new Vector3(0.2706414f, 0f, -0.9626803f) },
+                new List<Vector3>() { new Vector3(105.3796f, -999.0436f, 62.69141f), new Vector3(-0.08369686f, 0f, 0.9964913f) },
+                new List<Vector3>() { new Vector3(98.92573f, -999.0403f, 74.83594f), new Vector3(-0.9989709f, 0f, -0.04535747f) },
+                new List<Vector3>() { new Vector3(85.85157f, -999.0482f, 75.03125f), new Vector3(-0.9997424f, 0f, 0.0226965f) },
+                new List<Vector3>() { new Vector3(59.16797f, -999.0403f, 80.40234f), new Vector3(-0.8260864f, 0f, -0.5635436f) },
+                new List<Vector3>() { new Vector3(30.30076f, -999.0403f, 75.08984f), new Vector3(-0.02971719f, 0f, 0.9995583f) },
+                new List<Vector3>() { new Vector3(29.83984f, -999.0403f, 111.1211f), new Vector3(0.1754025f, 0f, 0.9844968f) },
+                new List<Vector3>() { new Vector3(49.30466f, -999.0403f, 119.875f), new Vector3(0.9999862f, 0f, 0.005249202f) },
+                new List<Vector3>() { new Vector3(71.47656f, -999.0482f, 120.4219f), new Vector3(0.9845094f, 0f, -0.1753316f) },
+            };
+            int Phase = 0;
+
+            ReferenceHub scp096 = SCPS.Instance.Chracters.Find(x => x.Name == "Scp096").npc;
+            scp096.TryOverridePosition(Stage[0][0], Vector3.zero);
+            Gtool.Rotate(scp096, Stage[0][1]);
+
+            while (!SCPS.Instance.IsEnd)
+            {
+                try
+                {
+                    await Task.Delay(1000);
+
+                    int rn = UnityEngine.Random.Range(level, 26);
+
+                    if (rn == 25)
+                    {
+                        if (Player.Get(17).CurrentRoom == Gtool.CameraRoom())
+                        {
+                            SCPS.Instance.Killer = "Scp096";
+                            Player.List.ToList().ForEach(x => x.Kill("SCP-096이 당신을 無로 되돌렸습니다."));
+
+                            SCPS.Instance.IsEnd = true;
+                            await Task.Delay(5000);
+                            Round.IsLocked = false;
+                        }
+
+                        if (Phase < (Stage.Count - 1))
+                            Phase += 1;
+
+                        scp096.TryOverridePosition(Stage[Phase][0], Vector3.zero);
+                        Gtool.Rotate(scp096, Stage[Phase][1]);
+
+                        if (Phase == Stage.Count - 1)
+                            Phase = UnityEngine.Random.Range(1, 4);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    ServerConsole.AddLog(ex.ToString());
+                }
+            }
+        }
+
+        public async Task Scp173(int level)
+        {
+            if (level < 1)
+                return;
+
+            List<List<Vector3>> Stage = new List<List<Vector3>>()
+            {
+                new List<Vector3>() { new Vector3(46.17308f, -802.235f, 96.46692f), new Vector3(0.006663424f, 0f, -0.9999778f) },
+                new List<Vector3>() { new Vector3(47.79235f, -802.235f, 98.01788f), new Vector3(-0.8903908f, 0f, -0.4551969f) },
+                new List<Vector3>() { new Vector3(49.6346f, -802.235f, 99.67786f), new Vector3(-0.9984583f, 0f, -0.05550671f) },
+                new List<Vector3>() { new Vector3(52.60084f, -802.235f, 99.86421f), new Vector3(-0.0003355424f, 0f, -1f) },
+                new List<Vector3>() { new Vector3(39.68065f, -999.0432f, 90.03945f), new Vector3(0.999989f, 0f, 0.004674017f) }
+            };
+            int Phase = 0;
+
+            ReferenceHub scp173 = SCPS.Instance.Chracters.Find(x => x.Name == "Scp173").npc;
+            scp173.TryOverridePosition(Stage[0][0], Vector3.zero);
+            Gtool.Rotate(scp173, Stage[0][1]);
+
+            while (!SCPS.Instance.IsEnd)
+            {
+                try
+                {
+                    await Task.Delay(2000);
+
+                    int rn = UnityEngine.Random.Range(level, Player.Get(19).CurrentRoom != Gtool.CameraRoom() ? 26 : 41);
+
+                    if (rn == 25)
+                    {
+                        if (Phase < (Stage.Count - 1))
+                            Phase += 1;
+
+                        if (Phase == Stage.Count - 1)
+                        {
+                            for (int i=39; i<76; i++)
+                            {
+                                scp173.TryOverridePosition(new Vector3(i, -999.0432f, 90.03945f), Vector3.zero);
+                                await Task.Delay(50);
+                            }
+
+                            for (int i=90; i>60; i--)
+                            {
+                                scp173.TryOverridePosition(new Vector3(75.02279f, -999.0436f, i), Vector3.zero);
+                                await Task.Delay(50);
+                            }
+
+                            for (int i=75; i>63; i--)
+                            {
+                                scp173.TryOverridePosition(new Vector3(i, -1002.372f, 47.85625f), Vector3.zero);
+                                await Task.Delay(100);
+                            }
+
+                            for (int i=63; i<66; i++)
+                            {
+                                scp173.TryOverridePosition(new Vector3(i, -1002.372f, 54.64531f), Vector3.zero);
+                                await Task.Delay(150);
+                            }
+
+                            if (SCPS.Instance.Using.Contains("Scp079ArmoryClose"))
+                                Phase = 0;
+
+                            else
+                            {
+                                SCPS.Instance.Killer = "Scp173";
+                                Player.List.ToList().ForEach(x => x.Kill("SCP-173이 당신의 목을 꺾었습니다."));
+
+                                SCPS.Instance.IsEnd = true;
+                                await Task.Delay(5000);
+                                Round.IsLocked = false;
+                            }
+                        }
+
+                        scp173.TryOverridePosition(Stage[Phase][0], Vector3.zero);
+                        Gtool.Rotate(scp173, Stage[Phase][1]);
+                    }
                 }
                 catch (Exception ex)
                 {

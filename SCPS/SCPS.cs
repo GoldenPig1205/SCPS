@@ -28,12 +28,14 @@ namespace SCPS
         public bool sync = false;
         public bool IsEnd = false;
         public bool IsFemur = false;
+        public bool IsLookedatScp096 = false;
         public bool IsCCTV = false;
         public float Battery = 100;
         public string Killer = null;
         public Dictionary<string, int> SetLevel = new Dictionary<string, int>() 
         { 
-            { "SCP-049", 0 }, { "SCP-939", 0 }, { "SCP-049-2", 0 }, { "SCP-106", 0 }, { "SCP-3114", 0 }
+            { "SCP-049", 0 }, { "SCP-939", 0 }, { "SCP-049-2", 0 }, { "SCP-106", 0 }, { "SCP-3114", 0 },
+            { "SCP-096", 0 }, { "SCP-173", 0 }
         };
         public Dictionary<string, string> Method = new Dictionary<string, string>()
         {
@@ -41,7 +43,9 @@ namespace SCPS
             { "SCP-939", "난이도 : ★★☆☆☆\n소리 없는 암살자입니다. 좌측 문에서 대기할 때 숨소리가 들립니다." }, 
             { "SCP-049-2", "난이도 : ★★☆☆☆\n앞쪽 환풍구를 통해서 당신에게 서서히 도달할 것입니다. 쓰러진 척 하는 연기가 속지 마십시오." }, 
             { "SCP-106", "난이도 : ★★★☆☆\n천천히 당신을 향해서 접근할 것입니다. 그는 시설 벽을 뚫고 당신에게 도달할 수 있습니다. 그를 막을 유일한 방법은, 그가 당신의 사무실에서 당신을 관찰하고 있을 때, 재빨리 CCTV를 SCP-106의 격리실로 옮긴 후, 스피커(v키)를 활성화하십시오." },
-            { "SCP-3114", "난이도 : ★★☆☆☆\n당신의 채취를 쫒아 오른쪽 환풍구로 도달할 것입니다. 그가 사무실에 나타났을 때 CCTV를 쳐다보십시오. 인간인 것을 들키지 않아야 합니다!" }
+            { "SCP-3114", "난이도 : ★★☆☆☆\n당신의 채취를 쫒아 오른쪽 환풍구로 도달할 것입니다. 그가 사무실에 나타났을 때 CCTV를 쳐다보십시오. 인간인 것을 들키지 않아야 합니다!" },
+            { "SCP-096", "난이도 : ★★★★☆\n그는 당신이 그의 얼굴을 \"확인\"하기 전까지는 절대로 해치지 않습니다. CCTV로 그를 발견했을 경우 최대한 빠르게 우회하십시오." },
+            { "SCP-173", "난이도 : ★★★★★\n매우 재빠른 이 개체는 당신의 사무실로 돌진까지 4단계의 준비 과정이 있습니다. 그가 자신의 방을 떠난 경우 최대한 빠르게 문을 닫으십시오." }
         };
         public List<string> Using = new List<string>() { "RedLightOnSR" };
 
@@ -68,6 +72,8 @@ namespace SCPS
             Exiled.Events.Handlers.Scp079.ElevatorTeleporting += OnElevatorTeleporting;
             Exiled.Events.Handlers.Scp079.ChangingSpeakerStatus += OnChangingSpeakerStatus;
             Exiled.Events.Handlers.Scp079.ChangingCamera += OnChangingCamera;
+
+            Exiled.Events.Handlers.Scp096.AddingTarget += OnAddingTarget;
         }
 
         public override void OnDisabled()
@@ -92,6 +98,8 @@ namespace SCPS
             Exiled.Events.Handlers.Scp079.ChangingSpeakerStatus -= OnChangingSpeakerStatus;
             Exiled.Events.Handlers.Scp079.ChangingCamera -= OnChangingCamera;
 
+            Exiled.Events.Handlers.Scp096.AddingTarget -= OnAddingTarget;
+
             Instance = null;
         }
 
@@ -114,6 +122,8 @@ namespace SCPS
             ReferenceHub PhoneGuy = Gtool.Spawn(RoleTypeId.ClassD, new Vector3(46.32286f, 0.91f, 64.23f));
             ReferenceHub Scp106 = Gtool.Spawn(RoleTypeId.Scp106, new Vector3(28.48828f, -998.7513f, 152.0195f));
             ReferenceHub Scp3114 = Gtool.Spawn(RoleTypeId.Scp3114, new Vector3(59f, -1004.276f, 67.01563f));
+            ReferenceHub Scp096 = Gtool.Spawn(RoleTypeId.Scp096, new Vector3(90.01107f, -999.0436f, 133.1367f));
+            ReferenceHub Scp173 = Gtool.Spawn(RoleTypeId.Scp173, new Vector3(46.17308f, -802.235f, 96.46692f));
 
             Scp049Dummy.transform.localScale = Vector3.one * -0.01f;
 
@@ -130,7 +140,7 @@ namespace SCPS
             Dictionary<ReferenceHub, string> register = new Dictionary<ReferenceHub, string>()
             {
                 { PlayerDummy, "PlayerDummy" }, { Scp049, "Scp049" }, { Scp049Dummy, "Scp049Dummy" }, { Scp939, "Scp939" }, { PhoneGuy, "PhoneGuy" },
-                { Scp106, "Scp106" }, { Scp3114, "Scp3114" }
+                { Scp106, "Scp106" }, { Scp3114, "Scp3114" }, { Scp096, "Scp096" }, { Scp173, "Scp173" }
             };
 
             foreach (var reg in register)
@@ -212,7 +222,9 @@ namespace SCPS
                 Tasks.Instance.Scp939(SetLevel["SCP-939"]),
                 Tasks.Instance.Scp0492(SetLevel["SCP-049-2"]),
                 Tasks.Instance.Scp106(SetLevel["SCP-106"]),
-                Tasks.Instance.Scp3114(SetLevel["SCP-3114"])
+                Tasks.Instance.Scp3114(SetLevel["SCP-3114"]),
+                Tasks.Instance.Scp096(SetLevel["SCP-096"]),
+                Tasks.Instance.Scp173(SetLevel["SCP-173"])
             );
         }
 
@@ -356,6 +368,11 @@ namespace SCPS
         public void OnChangingCamera(Exiled.Events.EventArgs.Scp079.ChangingCameraEventArgs ev)
         {
             ev.AuxiliaryPowerCost = 0;
+        }
+
+        public void OnAddingTarget(Exiled.Events.EventArgs.Scp096.AddingTargetEventArgs ev)
+        {
+            IsLookedatScp096 = true;
         }
     }
 }

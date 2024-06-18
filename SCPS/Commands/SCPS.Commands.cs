@@ -108,7 +108,7 @@ namespace SCPS.Commands
             bool result;
 			try
 			{
-                for (int i=0; i<5; i++) 
+                for (int i=0; i<7; i++) 
 				{
 					int level = 0;
 
