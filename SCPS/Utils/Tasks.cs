@@ -445,7 +445,7 @@ namespace SCPS
             {
                 try
                 {
-                    int rn = UnityEngine.Random.Range(level, 26);
+                    int rn = UnityEngine.Random.Range(level, 35);
 
                     if (rn == 25)
                     {
