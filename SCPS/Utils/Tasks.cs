@@ -23,7 +23,7 @@ namespace SCPS
 
         public async Task PhoneGuy()
         {
-            Gtool.PlaySound("PhoneGuy", $"phoneguy-{UnityEngine.Random.Range(1, 12)}", VoiceChatChannel.None, 15);
+            Gtool.PlaySound("PhoneGuy", $"", VoiceChatChannel.None, 15);
         }
 
         public async Task Sync079andBattery()
@@ -147,8 +147,6 @@ namespace SCPS
 
         public async Task Scp049(int level)
         {
-            if (level < 1)
-                return;
 
             List<List<Vector3>> Stage = new List<List<Vector3>>()
             {
@@ -169,6 +167,9 @@ namespace SCPS
             scp049.TryOverridePosition(Stage[0][0], Vector3.zero);
             Gtool.Rotate(scp049, Stage[0][1]);
 
+            if (level < 1)
+                return;
+
             while (!SCPS.Instance.IsEnd)
             {
                 try
@@ -182,7 +183,7 @@ namespace SCPS
                         if (Phase < (Stage.Count - 1))
                             Phase += 1;
 
-                        if (Phase == Stage.Count - 1)
+                        else if (Phase == Stage.Count - 1)
                         {
                             if (SCPS.Instance.Using.Contains("Scp079ArmoryClose"))
                                 Phase = UnityEngine.Random.Range(3, 5);
@@ -225,9 +226,6 @@ namespace SCPS
 
         public async Task Scp939(int level)
         {
-            if (level < 1)
-                return;
-
             List<List<Vector3>> Stage = new List<List<Vector3>>()
             {
                 new List<Vector3>() { new Vector3(98.94531f, -998.655f, 93.27344f), new Vector3(1, 0, 0) },
@@ -246,6 +244,9 @@ namespace SCPS
             scp939.TryOverridePosition(Stage[0][0], Vector3.zero);
             Gtool.Rotate(scp939, Stage[0][1]);
 
+            if (level < 1)
+                return;
+
             while (!SCPS.Instance.IsEnd)
             {
                 try
@@ -259,10 +260,7 @@ namespace SCPS
                         if (Phase < (Stage.Count - 1))
                             Phase += 1;
 
-                        scp939.TryOverridePosition(Stage[Phase][0], Vector3.zero);
-                        Gtool.Rotate(scp939, Stage[Phase][1]);
-
-                        if (Phase == Stage.Count - 1)
+                        else if (Phase == Stage.Count - 1)
                         {
                             if (SCPS.Instance.Using.Contains("Scp079ArmoryClose"))
                                 Phase = UnityEngine.Random.Range(1, 6);
@@ -277,6 +275,9 @@ namespace SCPS
                                 Round.IsLocked = false;
                             }
                         }
+
+                        scp939.TryOverridePosition(Stage[Phase][0], Vector3.zero);
+                        Gtool.Rotate(scp939, Stage[Phase][1]);
                     }
                 }
                 catch (Exception ex)
@@ -288,9 +289,6 @@ namespace SCPS
 
         public async Task Scp0492(int level)
         {
-            if (level < 1)
-                return;
-
             List<List<Vector3>> Stage = new List<List<Vector3>>()
             {
                 new List<Vector3>() { new Vector3(70.16341f, -1003, 64.92969f), new Vector3(0, 0, 0) },
@@ -307,6 +305,9 @@ namespace SCPS
 
             Ragdoll scp0492 = null;
 
+            if (level < 1)
+                return;
+
             while (!SCPS.Instance.IsEnd)
             {
                 try
@@ -321,7 +322,7 @@ namespace SCPS
                         if (Phase < (Stage.Count - 1))
                             Phase += 1;
 
-                        if (Phase == Stage.Count - 1)
+                        else if (Phase == Stage.Count - 1)
                         {
                             if (SCPS.Instance.Using.Contains("HeavyContainmentDoorClose"))
                                 Phase = 0;
@@ -350,9 +351,6 @@ namespace SCPS
 
         public async Task Scp106(int level)
         {
-            if (level < 1)
-                return;
-
             List<List<Vector3>> Stage = new List<List<Vector3>>()
             {
                 new List<Vector3>() { new Vector3(40.04688f, -998.1693f, 140.5391f), new Vector3(-0.03144205f, 0f, 0.9995056f) },
@@ -368,6 +366,9 @@ namespace SCPS
             int Phase = 0;
 
             ReferenceHub scp106 = SCPS.Instance.Chracters.Find(x => x.Name == "Scp106").npc;
+
+            if (level < 1)
+                return;
 
             while (!SCPS.Instance.IsEnd)
             {
@@ -389,12 +390,12 @@ namespace SCPS
                             {
                                 if (!SCPS.Instance.IsFemur)
                                 {
-                                    float Countdown = 10 - (1 / 10 * level);
+                                    float Countdown = 8 - (1 / 10 * level);
 
                                     while (Countdown > 0)
                                     {
-                                        await Task.Delay(10);
-                                        Countdown -= 0.01f;
+                                        await Task.Delay(100);
+                                        Countdown -= 0.1f;
 
                                         if (SCPS.Instance.IsFemur)
                                         {
@@ -425,9 +426,6 @@ namespace SCPS
 
         public async Task Scp3114(int level)
         {
-            if (level < 1)
-                return;
-
             List<List<Vector3>> Stage = new List<List<Vector3>>()
             {
                 new List<Vector3>() { new Vector3(63.16881f, -1001.9423f, 58.59989f), new Vector3(0, 0, 0) },
@@ -444,6 +442,9 @@ namespace SCPS
 
             Ragdoll scp3114ragdoll = null;
             ReferenceHub scp3114 = SCPS.Instance.Chracters.Find(x => x.Name == "Scp3114").npc;
+
+            if (level < 1)
+                return;
 
             while (!SCPS.Instance.IsEnd)
             {
@@ -469,8 +470,8 @@ namespace SCPS
                             bool Know = true;
                             while (Countdown > 0)
                             {
-                                await Task.Delay(10);
-                                Countdown -= 0.01f;
+                                await Task.Delay(100);
+                                Countdown -= 0.1f;
 
                                 if (SCPS.Instance.IsCCTV)
                                 {
@@ -504,9 +505,6 @@ namespace SCPS
 
         public async Task Scp096(int level)
         {
-            if (level < 1)
-                return;
-
             List<List<Vector3>> Stage = new List<List<Vector3>>()
             {
                 new List<Vector3>() { new Vector3(89.92904f, -999.0436f, 132.6211f), new Vector3(0.006663424f, 0f, -0.9999778f) },
@@ -528,6 +526,9 @@ namespace SCPS
             ReferenceHub scp096 = SCPS.Instance.Chracters.Find(x => x.Name == "Scp096").npc;
             scp096.TryOverridePosition(Stage[0][0], Vector3.zero);
             Gtool.Rotate(scp096, Stage[0][1]);
+
+            if (level < 1)
+                return;
 
             while (!SCPS.Instance.IsEnd)
             {
@@ -568,9 +569,6 @@ namespace SCPS
 
         public async Task Scp173(int level)
         {
-            if (level < 1)
-                return;
-
             List<List<Vector3>> Stage = new List<List<Vector3>>()
             {
                 new List<Vector3>() { new Vector3(46.17308f, -802.235f, 96.46692f), new Vector3(0.006663424f, 0f, -0.9999778f) },
@@ -584,6 +582,9 @@ namespace SCPS
             ReferenceHub scp173 = SCPS.Instance.Chracters.Find(x => x.Name == "Scp173").npc;
             scp173.TryOverridePosition(Stage[0][0], Vector3.zero);
             Gtool.Rotate(scp173, Stage[0][1]);
+
+            if (level < 1)
+                return;
 
             while (!SCPS.Instance.IsEnd)
             {

@@ -133,7 +133,12 @@ namespace SCPS.Commands
                 result = true;
 
                 return result;
-            };
+            }
+            finally
+            {
+                SCPS.Instance.IsSetLevel = true;
+            }
+            
         }
 
         public string Command { get; } = "레벨";

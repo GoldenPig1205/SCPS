@@ -26,6 +26,7 @@ namespace SCPS
         public List<Chracters> Chracters = new List<Chracters>();
 
         public bool sync = false;
+        public bool IsSetLevel = false;
         public bool IsEnd = false;
         public bool IsFemur = false;
         public bool IsLookedatScp096 = false;
@@ -170,6 +171,8 @@ namespace SCPS
             Gtool.PlaySound("PhoneGuy", $"bgm-{UnityEngine.Random.Range(1, 8)}", VoiceChatChannel.Intercom, 30, Loop: true);
 
             bool broadcast = false;
+            int time = 10;
+
             while (Round.IsLobby)
             {
                 if (Player.List.Count > 0)
@@ -177,18 +180,50 @@ namespace SCPS
                     if (!broadcast)
                     {
                         player.Broadcast(300, "<size=20><b>당신은 <color=red>SCP-079</color>의 전력을 제한하고 게이트를 여는 등 희생을 자처했지만, 모두가 탈출한 <color=#BDBDBD>Site-02</color> 기지에 홀로 버려졌습니다.\n" +
-                                               "이제 시설에 남겨진 것은 <u><color=#FACC2E>제한된 전력</color></u>과 <i>당신의 친구 <color=red>SCP-079</color></i>, <u><color=#58ACFA>사무실</color></u> 뿐입니다.\n" +
-                                               "약속된 지원의 시간은 새벽 6시, 그때까지 최대한 버텨내야만 합니다.</b></size>");
+                                                "이제 시설에 남겨진 것은 <u><color=#FACC2E>제한된 전력</color></u>과 <i>당신의 친구 <color=red>SCP-079</color></i>, <u><color=#58ACFA>사무실</color></u> 뿐입니다.\n" +
+                                                "약속된 지원의 시간은 새벽 6시, 그때까지 최대한 버텨내야만 합니다.</b></size>");
                         broadcast = true;
                     }
 
+                    time -= 1;
+
+                    if (time == 0 && !IsSetLevel)
+                    {
+                        for (int i = 0; i < 7; i++)
+                        {
+                            int level = UnityEngine.Random.Range(0, UnityEngine.Random.Range(5, UnityEngine.Random.Range(10, UnityEngine.Random.Range(15, 21))));
+                            SetLevel[SetLevel.Keys.ElementAt(i)] = level;
+                        }
+                    }
+
                     string output = "";
+
                     foreach (var item in SetLevel)
                     {
                         output += $"<color=red>{item.Key}</color> : {item.Value}\n";
                     }
+
+                    string Note()
+                    {
+                        if (time == 0)
+                        {
+                            return $"<color=#B40404>곧 게임이 시작됩니다..</color>";
+                        }
+                        else
+                        {
+                            return $"{time}초 뒤 게임이 자동으로 시작됩니다.";
+                        }
+                    }
+
                     output = output.TrimEnd('\n');
-                    player.ShowHint($"<align=left><b><size=50>A.I. Level</size></b>\n{output}</align>\n\n콘솔(~)을 열고 [.도움말] 명령어를 입력하세요.");
+                    player.ShowHint($"<align=left><b><size=50>A.I. Level</size></b>\n{output}</align>\n\n<color=orange>콘솔(~)을 열고 [.도움말] 명령어를 입력하세요.</color>\n\n<b>{Note()}</b>", 10);
+                    
+                    if (time == 0)
+                    {
+                        await Task.Delay(8000);
+                        Round.Start();
+                        break;
+                    }
                 }
 
                 await Task.Delay(1000);
