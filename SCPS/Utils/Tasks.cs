@@ -105,7 +105,7 @@ namespace SCPS
                     break;
                 }
 
-                SCPS.Instance.Battery -= SCPS.Instance.Using.Count * 0.021f;
+                SCPS.Instance.Battery -= SCPS.Instance.Using.Count * 0.0278f;
                 await Task.Delay(100);
             }
         }
