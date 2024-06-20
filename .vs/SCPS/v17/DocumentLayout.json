@@ -46,9 +46,9 @@
               "Title": "SCPS.cs",
               "DocumentMoniker": "C:\\Users\\GoldenPig1205\\Desktop\\GoldenPig1205\\Visual Studio 2022\\SCPS\\SCPS\\SCPS.cs",
               "RelativeDocumentMoniker": "SCPS\\SCPS.cs",
-              "ToolTip": "C:\\Users\\GoldenPig1205\\Desktop\\GoldenPig1205\\Visual Studio 2022\\SCPS\\SCPS\\SCPS.cs*",
-              "RelativeToolTip": "SCPS\\SCPS.cs*",
-              "ViewState": "AQIAALUAAAAAAAAAAAAAAL0AAAAmAAAA",
+              "ToolTip": "C:\\Users\\GoldenPig1205\\Desktop\\GoldenPig1205\\Visual Studio 2022\\SCPS\\SCPS\\SCPS.cs",
+              "RelativeToolTip": "SCPS\\SCPS.cs",
+              "ViewState": "AQIAAHoBAAAAAAAAAAAmwJ4BAAAAAAAA",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2024-06-13T05:37:26.792Z",
               "EditorCaption": ""
@@ -63,8 +63,7 @@
               "RelativeToolTip": "SCPS\\Configs\\Config.cs",
               "ViewState": "AQIAAAAAAAAAAAAAAAAAAA0AAAAFAAAA",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-06-13T05:37:39.601Z",
-              "EditorCaption": ""
+              "WhenOpened": "2024-06-13T05:37:39.601Z"
             },
             {
               "$type": "Document",
@@ -72,12 +71,11 @@
               "Title": "SCPS.Commands.cs",
               "DocumentMoniker": "C:\\Users\\GoldenPig1205\\Desktop\\GoldenPig1205\\Visual Studio 2022\\SCPS\\SCPS\\Commands\\SCPS.Commands.cs",
               "RelativeDocumentMoniker": "SCPS\\Commands\\SCPS.Commands.cs",
-              "ToolTip": "C:\\Users\\GoldenPig1205\\Desktop\\GoldenPig1205\\Visual Studio 2022\\SCPS\\SCPS\\Commands\\SCPS.Commands.cs*",
-              "RelativeToolTip": "SCPS\\Commands\\SCPS.Commands.cs*",
+              "ToolTip": "C:\\Users\\GoldenPig1205\\Desktop\\GoldenPig1205\\Visual Studio 2022\\SCPS\\SCPS\\Commands\\SCPS.Commands.cs",
+              "RelativeToolTip": "SCPS\\Commands\\SCPS.Commands.cs",
               "ViewState": "AQIAAGQAAAAAAAAAAAAswIoAAAAwAAAA",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-06-13T05:37:40.498Z",
-              "EditorCaption": ""
+              "WhenOpened": "2024-06-13T05:37:40.498Z"
             },
             {
               "$type": "Document",
@@ -89,8 +87,7 @@
               "RelativeToolTip": "SCPS\\Utils\\Chracters.cs",
               "ViewState": "AQIAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-06-13T05:37:43.735Z",
-              "EditorCaption": ""
+              "WhenOpened": "2024-06-13T05:37:43.735Z"
             },
             {
               "$type": "Document",
@@ -102,8 +99,7 @@
               "RelativeToolTip": "SCPS\\Utils\\Extensions.cs",
               "ViewState": "AQIAAAAAAAAAAAAAAAAAABkAAAANAAAA",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-06-13T05:37:44.348Z",
-              "EditorCaption": ""
+              "WhenOpened": "2024-06-13T05:37:44.348Z"
             },
             {
               "$type": "Document",
@@ -115,8 +111,7 @@
               "RelativeToolTip": "SCPS\\Utils\\Gtool.cs",
               "ViewState": "AQIAABwAAAAAAAAAAAAAwC0AAAA2AAAA",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-06-13T05:37:45.029Z",
-              "EditorCaption": ""
+              "WhenOpened": "2024-06-13T05:37:45.029Z"
             },
             {
               "$type": "Document",
@@ -128,8 +123,7 @@
               "RelativeToolTip": "SCPS\\Utils\\Tasks.cs",
               "ViewState": "AQIAAG0BAAAAAAAAAAAAAIgBAAA3AAAA",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-06-13T05:37:45.692Z",
-              "EditorCaption": ""
+              "WhenOpened": "2024-06-13T05:37:45.692Z"
             }
           ]
         }
