@@ -67,40 +67,6 @@ namespace SCPS.Commands
     }
 
     [CommandHandler(typeof(ClientCommandHandler))]
-    public class Start : ICommand
-    {
-        public bool Execute(ArraySegment<string> arguments, ICommandSender sender, out string response)
-		{
-            bool result;
-
-			if (!Round.IsStarted)
-			{
-				Round.Start();
-
-				response = "게임을 시작합니다!";
-				result = true;
-
-				return result;
-			}
-			else
-			{
-                response = "게임 시작 전에 사용할 수 있는 명령어입니다.";
-                result = false;
-
-                return result;
-            }
-        }
-
-        public string Command { get; } = "시작";
-
-        public string[] Aliases { get; } = { };
-
-        public string Description { get; } = "게임을 시작합니다.";
-
-        public bool SanitizeResponse { get; } = true;
-    }
-
-    [CommandHandler(typeof(ClientCommandHandler))]
     public class SetLevel : ICommand
     {
         public bool Execute(ArraySegment<string> arguments, ICommandSender sender, out string response)
