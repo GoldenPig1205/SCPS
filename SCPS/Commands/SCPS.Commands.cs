@@ -16,7 +16,6 @@ namespace SCPS.Commands
             bool result;
 
             response = "\n.레벨 (AI1 Level) (AI2 Level) (AI3 Level) .. : \n나열된 SCP들의 레벨(0~20, 0은 비활성화)을 설정합니다. 모두 기입하여야 합니다.\n" +
-                       ".시작 : 게임을 시작합니다.\n" +
                        ".공략 (SCP 이름 ex. SCP-106) : 각 SCP를 공략하는 방법을 출력합니다.";
             result = true;
 

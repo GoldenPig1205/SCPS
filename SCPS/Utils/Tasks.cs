@@ -105,7 +105,7 @@ namespace SCPS
                     break;
                 }
 
-                SCPS.Instance.Battery -= SCPS.Instance.Using.Count * 0.0278f;
+                SCPS.Instance.Battery -= SCPS.Instance.Using.Count * 0.024f;
                 await Task.Delay(100);
             }
         }
@@ -540,7 +540,7 @@ namespace SCPS
 
                     if (rn == 25)
                     {
-                        if (Player.Get(17).CurrentRoom == Gtool.CameraRoom())
+                        if (Player.Get(17).CurrentRoom == Gtool.CameraRoom() && !SCPS.Instance.IsEnd)
                         {
                             SCPS.Instance.Killer = "Scp096";
                             Player.List.ToList().ForEach(x => x.Kill("SCP-096이 당신을 無로 되돌렸습니다."));
