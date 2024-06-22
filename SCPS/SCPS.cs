@@ -59,7 +59,6 @@ namespace SCPS
             Exiled.Events.Handlers.Server.RoundEnded += OnRoundEnded;
 
             Exiled.Events.Handlers.Player.Left += OnLeft;
-            Exiled.Events.Handlers.Player.FlippingCoin += OnFlippingCoin;
             Exiled.Events.Handlers.Player.ActivatingWorkstation += OnActivatingWorkstation;
             Exiled.Events.Handlers.Player.SearchingPickup += OnSearchingPickup;
             Exiled.Events.Handlers.Player.InteractingDoor += OnInteractingDoor;
@@ -84,7 +83,6 @@ namespace SCPS
             Exiled.Events.Handlers.Server.RoundEnded -= OnRoundEnded;
 
             Exiled.Events.Handlers.Player.Left -= OnLeft;
-            Exiled.Events.Handlers.Player.FlippingCoin -= OnFlippingCoin;
             Exiled.Events.Handlers.Player.ActivatingWorkstation -= OnActivatingWorkstation;
             Exiled.Events.Handlers.Player.SearchingPickup -= OnSearchingPickup;
             Exiled.Events.Handlers.Player.InteractingDoor -= OnInteractingDoor;
@@ -282,16 +280,6 @@ namespace SCPS
                 Player.Get(11).Group = new UserGroup { BadgeColor = "red" };
                 Gtool.PlaySound("PhoneGuy", $"jumpscare-{Killer}", VoiceChatChannel.Proximity, 5000);
             }
-        }
-
-        public void OnFlippingCoin(Exiled.Events.EventArgs.Player.FlippingCoinEventArgs ev)
-        {
-            ReferenceHub playerHub = ev.Player.ReferenceHub;
-            FpcStandardRoleBase playerRole = playerHub.roleManager.CurrentRole as FpcStandardRoleBase;
-            Vector3 playerForward = playerRole.transform.forward;
-
-            ServerConsole.AddLog($"{ev.Player.Nickname}의 위치 : new Vector3({ev.Player.Position.x}f, {ev.Player.Position.y}f, {ev.Player.Position.z}f)", ConsoleColor.DarkMagenta);
-            ServerConsole.AddLog($"{ev.Player.Nickname}의 방향 : new Vector3({playerForward.x}f, {playerForward.y}f, {playerForward.z}f)", ConsoleColor.Blue);
         }
 
         public void OnActivatingWorkstation(Exiled.Events.EventArgs.Player.ActivatingWorkstationEventArgs ev)
