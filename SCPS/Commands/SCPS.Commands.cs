@@ -16,7 +16,8 @@ namespace SCPS.Commands
             bool result;
 
             response = "\n.레벨 (AI1 Level) (AI2 Level) (AI3 Level) .. : \n나열된 SCP들의 레벨(0~20, 0은 비활성화)을 설정합니다. 모두 기입하여야 합니다.\n" +
-                       ".공략 (SCP 이름 ex. SCP-106) : 각 SCP를 공략하는 방법을 출력합니다.";
+                       ".공략 (SCP 이름 ex. SCP-106) : 각 SCP를 공략하는 방법을 출력합니다.\n" +
+                       ".시작 : 게임을 시작합니다.";
             result = true;
 
             return result;
@@ -40,7 +41,7 @@ namespace SCPS.Commands
             {
                 bool result;
 
-                response = $"\n[ {arguments.At(0)} ]\n{SCPS.Instance.Method[arguments.At(0)]}\n* 모든 SCP는 CCTV로 쳐다보면 둔해집니다.";
+                response = $"\n{string.Join("\n\n", SCPS.Instance.Method.Select(pair => $"[{pair.Key}]\n {pair.Value}"))}\n\n- 모든 SCP는 CCTV로 쳐다보면 둔해집니다.\n- CCTV를 보려면 사무실 정면 우측 하단에 있는 워크스테이션과 상호작용 하십시오.\r\n- CCTV를 그만 보려면 핑(E 키)을 찍으십시오.\r\n- CCTV로 SCP들을 보고 있으면 평소보다 둔해집니다. (SCP-049-2 제외, SCP-106의 경우 효과를 3배 받습니다.)\r\n- SCP의 비명 소리는 각기 다릅니다. 소리 크기에 주의하십시오.\r\n- SCP의 첫 시작 장소는 SCP:SL의 SCP 스폰 장소와 동일합니다.";
                 result = true;
 
                 return result;
@@ -61,6 +62,39 @@ namespace SCPS.Commands
         public string[] Aliases { get; } = { };
 
         public string Description { get; } = ".공략 (SCP 이름 ex. SCP-106)";
+
+        public bool SanitizeResponse { get; } = true;
+    }
+
+    [CommandHandler(typeof(ClientCommandHandler))]
+    public class Start : ICommand
+    {
+        public bool Execute(ArraySegment<string> arguments, ICommandSender sender, out string response)
+        {
+            bool result;
+
+            if (Round.IsStarted)
+            {
+
+                response = "이미 게임이 시작되었습니다!";
+                result = false;
+
+                return result;
+            }
+            else
+            {
+                Round.Start();
+                response = "게임을 시작하였습니다.";
+                result = true;
+                return result;
+            }
+        }
+
+        public string Command { get; } = "시작";
+
+        public string[] Aliases { get; } = { };
+
+        public string Description { get; } = "게임을 시작합니다.";
 
         public bool SanitizeResponse { get; } = true;
     }
