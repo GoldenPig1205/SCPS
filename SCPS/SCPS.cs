@@ -108,6 +108,7 @@ namespace SCPS
         {
             Map.CleanAllItems();
             Server.ExecuteCommand("/mp load SCPS");
+            Round.IsLocked = true;
 
             while (Player.List.Count < 1)
                 await Task.Delay(1000);
@@ -179,7 +180,8 @@ namespace SCPS
                 {
                     if (!broadcast)
                     {
-                        player.Broadcast(300, "<size=20><b>당신은 <color=red>SCP-079</color>의 전력을 제한하고 게이트를 여는 등 희생을 자처했지만, 모두가 탈출한 <color=#BDBDBD>Site-02</color> 기지에 홀로 버려졌습니다.\n" +
+                        foreach (var p in Player.List)
+                            p.Broadcast(300, "<size=20><b>당신은 <color=red>SCP-079</color>의 전력을 제한하고 게이트를 여는 등 희생을 자처했지만, 모두가 탈출한 <color=#BDBDBD>Site-02</color> 기지에 홀로 버려졌습니다.\n" +
                                                 "이제 시설에 남겨진 것은 <u><color=#FACC2E>제한된 전력</color></u>과 <i>당신의 친구 <color=red>SCP-079</color></i>, <u><color=#58ACFA>사무실</color></u> 뿐입니다.\n" +
                                                 "약속된 지원의 시간은 새벽 6시, 그때까지 최대한 버텨내야만 합니다.</b></size>");
                         broadcast = true;
@@ -216,7 +218,8 @@ namespace SCPS
                     }
 
                     output = output.TrimEnd('\n');
-                    player.ShowHint($"<align=left><b><size=50>A.I. Level</size></b>\n{output}</align>\n\n<color=orange>콘솔(~)을 열고 [.도움말] 명령어를 입력하세요.</color>\n\n<b>{Note()}</b>", 10);
+                    foreach (var p in Player.List)
+                        p.ShowHint($"<align=left><b><size=50>A.I. Level</size></b>\n{output}</align>\n\n<color=orange>콘솔(~)을 열고 [.도움말] 명령어를 입력하세요.</color>\n\n<b>{Note()}</b>", 10);
                     
                     if (time == 0)
                     {
@@ -229,8 +232,11 @@ namespace SCPS
                 await Task.Delay(1000);
             }
 
-            player.ShowHint("");
-            player.ClearBroadcasts();
+            foreach (var p in Player.List)
+            {
+                player.ShowHint("");
+                player.ClearBroadcasts();
+            }
         }
 
         public async void OnRoundStarted()
@@ -265,11 +271,8 @@ namespace SCPS
 
             foreach (var p in Player.List)
             {
-                if (player != p)
-                {
-                    player.Role.Set(RoleTypeId.FacilityGuard);
-                    player.Position = new Vector3(68.2181f, -1002.403f, 54.75781f);
-                }
+                p.Role.Set(RoleTypeId.FacilityGuard);
+                p.Position = new Vector3(68.2181f, -1002.403f, 54.75781f);
             }
         }
 
@@ -280,10 +283,10 @@ namespace SCPS
 
         public void OnVerified(Exiled.Events.EventArgs.Player.VerifiedEventArgs ev)
         {
-            if (Round.IsStarted && player != null)
+            if (Round.IsStarted)
             {
-                player.Role.Set(RoleTypeId.FacilityGuard);
-                player.Position = new Vector3(68.2181f, -1002.403f, 54.75781f);
+                ev.Player.Role.Set(RoleTypeId.FacilityGuard);
+                ev.Player.Position = new Vector3(68.2181f, -1002.403f, 54.75781f);
             }
         }
 

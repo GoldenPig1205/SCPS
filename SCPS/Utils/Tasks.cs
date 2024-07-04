@@ -66,7 +66,8 @@ namespace SCPS
                     else return "FF0000";
                 }
 
-                SCPS.Instance.player.ShowHint($"\n\n\n\n\n\n\n\n<align=left><size=25>Power Left : <i>{(int)SCPS.Instance.Battery}%</i>\nUsage : <color=#{ColorTag()}>{UsageBar}</color></size></align>", 1f);
+                foreach (var p in Player.List)
+                    p.ShowHint($"\n\n\n\n\n\n\n\n<align=left><size=25>Power Left : <i>{(int)SCPS.Instance.Battery}%</i>\nUsage : <color=#{ColorTag()}>{UsageBar}</color></size></align>", 1f);
                 await Task.Delay(500);
             }
         }
