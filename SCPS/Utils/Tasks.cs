@@ -84,26 +84,31 @@ namespace SCPS
                             obj.Destroy();
                     }
 
-                    if (SCPS.Instance.player.Role.Type == RoleTypeId.Scp079)
+                    Player s0p = Player.List.ToList().Find(x => x.Role.Type == RoleTypeId.Scp079);
+
+                    if (s0p != null)
                     {
-                        ReferenceHub pd = SCPS.Instance.Chracters.Find(x => x.Name == "PlayerDummy").npc;
-                        pd.TryOverridePosition(new Vector3(46.32286f, 0.91f, 64.23f), Vector3.zero);
+                        if (s0p.Role.Type == RoleTypeId.Scp079)
+                        {
+                            ReferenceHub pd = SCPS.Instance.Chracters.Find(x => x.Name == "PlayerDummy").npc;
+                            pd.TryOverridePosition(new Vector3(46.32286f, 0.91f, 64.23f), Vector3.zero);
 
-                        SCPS.Instance.player.Role.Set(RoleTypeId.FacilityGuard);
-                        SCPS.Instance.player.Position = new Vector3(68.2181f, -1002.403f, 54.75781f);
-                        SCPS.Instance.player.EnableEffect(EffectType.Ensnared);
+                            s0p.Role.Set(RoleTypeId.FacilityGuard);
+                            s0p.Position = new Vector3(68.2181f, -1002.403f, 54.75781f);
+                            s0p.EnableEffect(EffectType.Ensnared);
+                        }
+
+                        foreach (var door in Exiled.API.Features.Doors.BreakableDoor.List)
+                        {
+                            door.ChangeLock(DoorLockType.Regular079);
+                            door.IsOpen = true;
+                            SCPS.Instance.Using.Clear();
+                        }
+
+                        s0p.EnableEffect(EffectType.Scanned);
+
+                        break;
                     }
-
-                    foreach (var door in Exiled.API.Features.Doors.BreakableDoor.List)
-                    {
-                        door.ChangeLock(DoorLockType.Regular079);
-                        door.IsOpen = true;
-                        SCPS.Instance.Using.Clear();
-                    }
-
-                    SCPS.Instance.player.EnableEffect(EffectType.Scanned);
-
-                    break;
                 }
 
                 SCPS.Instance.Battery -= SCPS.Instance.Using.Count * 0.024f;
@@ -114,12 +119,12 @@ namespace SCPS
         public async Task Timer()
         {
             await Task.Delay(1000);
-            SCPS.Instance.player.Broadcast(45, "<b><size=40>12AM</size></b>");
+            Player.List.ToList().ForEach(x => x.Broadcast(45, "<b><size=40>12AM</size></b>"));
             await Task.Delay(45000);
 
             for (int t = 1; t < 6; t++)
             {
-                SCPS.Instance.player.Broadcast(45, $"<b><size=40>{t}AM</size></b>");
+                Player.List.ToList().ForEach(x => x.Broadcast(45, $"<b><size=40>{t}AM</size></b>"));
                 await Task.Delay(35000);
                 if (t == 5)
                     Server.ExecuteCommand($"/server_event play_effect_mtf");
@@ -128,8 +133,7 @@ namespace SCPS
 
             foreach (var p in Player.List)
             {
-                if (p != SCPS.Instance.player)
-                    p.Kill("6시!!");
+                p.Kill("6시!!");
             }
 
             if (!SCPS.Instance.IsEnd)
@@ -138,9 +142,9 @@ namespace SCPS
                 Gtool.PlaySound("PhoneGuy", $"fnaf-end", VoiceChatChannel.Intercom, 30);
 
                 SCPS.Instance.IsEnd = true;
-                SCPS.Instance.player.ShowHint("<size=150><b>5AM</b></size>\n\n\n\n\n\n\n\n\n\n", 5);
+                Player.List.ToList().ForEach(x => x.ShowHint("<size=150><b>5AM</b></size>\n\n\n\n\n\n\n\n\n\n", 5));
                 await Task.Delay(4000);
-                SCPS.Instance.player.ShowHint("<size=150><b>6AM</b></size>\n\n\n\n\n\n\n\n\n\n", 10);
+                Player.List.ToList().ForEach(x => x.ShowHint("<size=150><b>6AM</b></size>\n\n\n\n\n\n\n\n\n\n", 10));
                 await Task.Delay(6000);
                 Round.IsLocked = false;
             }

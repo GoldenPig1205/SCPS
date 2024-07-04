@@ -16,8 +16,7 @@ namespace SCPS.Commands
             bool result;
 
             response = "\n.레벨 (AI1 Level) (AI2 Level) (AI3 Level) .. : \n나열된 SCP들의 레벨(0~20, 0은 비활성화)을 설정합니다. 모두 기입하여야 합니다.\n" +
-                       ".공략 (SCP 이름 ex. SCP-106) : 각 SCP를 공략하는 방법을 출력합니다.\n" +
-                       ".시작 : 게임을 시작합니다.";
+                       ".공략 (SCP 이름 ex. SCP-106) : 각 SCP를 공략하는 방법을 출력합니다.";
             result = true;
 
             return result;
@@ -67,39 +66,6 @@ namespace SCPS.Commands
     }
 
     [CommandHandler(typeof(ClientCommandHandler))]
-    public class Start : ICommand
-    {
-        public bool Execute(ArraySegment<string> arguments, ICommandSender sender, out string response)
-        {
-            bool result;
-
-            if (Round.IsStarted)
-            {
-
-                response = "이미 게임이 시작되었습니다!";
-                result = false;
-
-                return result;
-            }
-            else
-            {
-                Round.Start();
-                response = "게임을 시작하였습니다.";
-                result = true;
-                return result;
-            }
-        }
-
-        public string Command { get; } = "시작";
-
-        public string[] Aliases { get; } = { };
-
-        public string Description { get; } = "게임을 시작합니다.";
-
-        public bool SanitizeResponse { get; } = true;
-    }
-
-    [CommandHandler(typeof(ClientCommandHandler))]
     public class SetLevel : ICommand
     {
         public bool Execute(ArraySegment<string> arguments, ICommandSender sender, out string response)
@@ -107,9 +73,9 @@ namespace SCPS.Commands
             bool result;
             Player player = Player.Get(sender as CommandSender);
 
-			try
-			{
-                if (player == SCPS.Instance.player)
+            try
+            {
+                if (!Round.IsStarted)
                 {
                     for (int i = 0; i < 7; i++)
                     {
@@ -132,13 +98,13 @@ namespace SCPS.Commands
                 }
                 else
                 {
-                    response = "당신은 플레이어가 아닙니다.";
+                    response = "게임이 이미 시작되었습니다!";
                     result = false;
 
                     return result;
                 }
             }
-			catch (Exception ex)
+            catch (Exception ex)
 			{
                 response = "올바르지 않은 양식입니다! 모든 SCP의 레벨을 설정해야 합니다!";
                 result = true;

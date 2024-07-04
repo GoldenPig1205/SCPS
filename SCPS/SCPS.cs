@@ -22,7 +22,6 @@ namespace SCPS
     {
         public static SCPS Instance;
 
-        public Player player = null;
         public List<Chracters> Chracters = new List<Chracters>();
 
         public bool sync = false;
@@ -58,7 +57,6 @@ namespace SCPS
             Exiled.Events.Handlers.Server.RoundStarted += OnRoundStarted;
             Exiled.Events.Handlers.Server.RoundEnded += OnRoundEnded;
 
-            Exiled.Events.Handlers.Player.Verified += OnVerified;
             Exiled.Events.Handlers.Player.Left += OnLeft;
             Exiled.Events.Handlers.Player.ActivatingWorkstation += OnActivatingWorkstation;
             Exiled.Events.Handlers.Player.SearchingPickup += OnSearchingPickup;
@@ -83,7 +81,6 @@ namespace SCPS
             Exiled.Events.Handlers.Server.RoundStarted -= OnRoundStarted;
             Exiled.Events.Handlers.Server.RoundEnded -= OnRoundEnded;
 
-            Exiled.Events.Handlers.Player.Verified -= OnVerified;
             Exiled.Events.Handlers.Player.Left -= OnLeft;
             Exiled.Events.Handlers.Player.ActivatingWorkstation -= OnActivatingWorkstation;
             Exiled.Events.Handlers.Player.SearchingPickup -= OnSearchingPickup;
@@ -108,12 +105,11 @@ namespace SCPS
         {
             Map.CleanAllItems();
             Server.ExecuteCommand("/mp load SCPS");
-            Round.IsLocked = true;
 
             while (Player.List.Count < 1)
                 await Task.Delay(1000);
 
-            player = Player.List.ToList()[0];
+            Round.IsLobbyLocked = true;
             Round.IsLocked = true;
             Server.ExecuteCommand($"/decontamination disable");
 
@@ -126,18 +122,6 @@ namespace SCPS
             ReferenceHub Scp3114 = Gtool.Spawn(RoleTypeId.Scp3114, new Vector3(59f, -1004.276f, 67.01563f));
             ReferenceHub Scp096 = Gtool.Spawn(RoleTypeId.Scp096, new Vector3(90.01107f, -999.0436f, 133.1367f));
             ReferenceHub Scp173 = Gtool.Spawn(RoleTypeId.Scp173, new Vector3(46.17308f, -802.235f, 96.46692f));
-
-            Scp049Dummy.transform.localScale = Vector3.one * -0.01f;
-
-            foreach (Player player in Player.List)
-            {
-                Server.SendSpawnMessage.Invoke(null, new object[]
-                    {
-                        Scp049Dummy.netIdentity,
-                        player.Connection
-                    }
-                );
-            }
 
             Dictionary<ReferenceHub, string> register = new Dictionary<ReferenceHub, string>()
             {
@@ -172,7 +156,7 @@ namespace SCPS
             Gtool.PlaySound("PhoneGuy", $"bgm-{UnityEngine.Random.Range(1, 8)}", VoiceChatChannel.Intercom, 30, Loop: true);
 
             bool broadcast = false;
-            int time = 50;
+            int time = 30;
 
             while (Round.IsLobby)
             {
@@ -219,8 +203,12 @@ namespace SCPS
 
                     output = output.TrimEnd('\n');
                     foreach (var p in Player.List)
-                        p.ShowHint($"<align=left><b><size=50>A.I. Level</size></b>\n{output}</align>\n\n<color=orange>콘솔(~)을 열고 [.도움말] 명령어를 입력하세요.</color>\n\n<b>{Note()}</b>", 10);
-                    
+                    {
+                        if (!p.IsNPC)
+                        {
+                            p.ShowHint($"<align=left><b><size=50>A.I. Level</size></b>\n{output}</align>\n\n<color=orange>콘솔(~)을 열고 [.도움말] 명령어를 입력하세요.</color>\n\n<b>{Note()}</b>", 10);
+                        }
+                    }
                     if (time == 0)
                     {
                         await Task.Delay(8000);
@@ -234,15 +222,24 @@ namespace SCPS
 
             foreach (var p in Player.List)
             {
-                player.ShowHint("");
-                player.ClearBroadcasts();
+                if (!p.IsNPC)
+                {
+                    p.ShowHint("");
+                    p.ClearBroadcasts();
+                }
             }
         }
 
         public async void OnRoundStarted()
         {
-            player.Role.Set(RoleTypeId.FacilityGuard);
-            player.Position = new Vector3(68.2181f, -1002.403f, 54.75781f);
+            foreach (var p in Player.List)
+            {
+                if (!p.IsNPC)
+                {
+                    p.Role.Set(RoleTypeId.FacilityGuard);
+                    p.Position = new Vector3(68.2181f, -1002.403f, 54.75781f);
+                }
+            }
             Map.TurnOffAllLights(99999);
 
             Gtool.PlayerGet("PhoneGuy").DisplayNickname = "Phone Guy";
@@ -267,12 +264,38 @@ namespace SCPS
                 Tasks.Instance.Scp173(SetLevel["SCP-173"])
             );
 
-            await Task.Delay(1000);
-
-            foreach (var p in Player.List)
+            while (true)
             {
-                p.Role.Set(RoleTypeId.FacilityGuard);
-                p.Position = new Vector3(68.2181f, -1002.403f, 54.75781f);
+                ReferenceHub Scp049Dummy = Chracters.Find(x => x.Name == "Scp049Dummy").npc;
+
+                foreach (var p in Player.List)
+                {
+                    try
+                    {
+                        if (!p.IsNPC)
+                        {
+                            if (p.Role.Type == RoleTypeId.Spectator)
+                            {
+                                p.Role.Set(RoleTypeId.FacilityGuard);
+                                p.Position = new Vector3(68.2181f, -1002.403f, 54.75781f);
+                            }
+
+                            Scp049Dummy.transform.localScale = Vector3.one * -0.01f;
+
+                            Server.SendSpawnMessage.Invoke(null, new object[]
+                            {
+                                Scp049Dummy.netIdentity,
+                                p.Connection
+                            }
+                        );
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                    }
+                }
+
+                await Task.Delay(5000);
             }
         }
 
@@ -281,24 +304,15 @@ namespace SCPS
             Server.ExecuteCommand("sr");
         }
 
-        public void OnVerified(Exiled.Events.EventArgs.Player.VerifiedEventArgs ev)
-        {
-            if (Round.IsStarted)
-            {
-                ev.Player.Role.Set(RoleTypeId.FacilityGuard);
-                ev.Player.Position = new Vector3(68.2181f, -1002.403f, 54.75781f);
-            }
-        }
-
         public void OnLeft(Exiled.Events.EventArgs.Player.LeftEventArgs ev)
         {
-            if (ev.Player == player)
+            if (Player.List.Count < 1)
                 Server.ExecuteCommand("sr");
         }
 
         public void OnDied(Exiled.Events.EventArgs.Player.DiedEventArgs ev)
         {
-            if (ev.Player == player)
+            if (!ev.Player.IsNPC)
             {
                 Gtool.PlayerGet("PhoneGuy").DisplayNickname = "Game Over";
                 Gtool.PlayerGet("PhoneGuy").Group = new UserGroup { BadgeColor = "red" };
@@ -310,16 +324,18 @@ namespace SCPS
         {
             ev.IsAllowed = false;
 
-            if (player == ev.Player && !(Battery < 0.3f))
+            if (!IsCCTV && !(Battery < 0.3f))
             {
+                IsCCTV = true;
+
                 ev.Player.Role.Set(RoleTypeId.Scp079);
 
                 ReferenceHub pd = Chracters.Find(x => x.Name == "PlayerDummy").npc;
                 pd.TryOverridePosition(new Vector3(68.2181f, -1002.403f, 54.75781f), Vector3.zero);
                 Gtool.Rotate(pd, new Vector3(1, -2, 2));
+                Player.Get(pd.PlayerId).CustomName = ev.Player.DisplayNickname;
 
                 Using.Add("CCTV");
-                IsCCTV = true;
             }
         }
 
@@ -383,8 +399,8 @@ namespace SCPS
             ReferenceHub pd = Chracters.Find(x => x.Name == "PlayerDummy").npc;
             pd.TryOverridePosition(new Vector3(46.32286f, 0.91f, 64.23f), Vector3.zero);
 
-            player.Role.Set(RoleTypeId.FacilityGuard);
-            player.Position = new Vector3(68.2181f, -1002.403f, 54.75781f);
+            ev.Player.Role.Set(RoleTypeId.FacilityGuard);
+            ev.Player.Position = new Vector3(68.2181f, -1002.403f, 54.75781f);
 
             Using.Remove("CCTV");
             IsCCTV = false;

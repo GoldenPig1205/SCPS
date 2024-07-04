@@ -32,7 +32,9 @@ namespace SCPS
 
         public static Room CameraRoom()
         {
-            if (SCPS.Instance.player.Role is Scp079Role scp079)
+            Player s0p = Player.List.ToList().Find(x => x.Role.Type == RoleTypeId.Scp079);
+
+            if (s0p != null && s0p.Role is Scp079Role scp079)
                 return scp079.Camera.Room;
 
             else
