@@ -58,6 +58,7 @@ namespace SCPS
             Exiled.Events.Handlers.Server.RoundStarted += OnRoundStarted;
             Exiled.Events.Handlers.Server.RoundEnded += OnRoundEnded;
 
+            Exiled.Events.Handlers.Player.Verified += OnVerified;
             Exiled.Events.Handlers.Player.Left += OnLeft;
             Exiled.Events.Handlers.Player.ActivatingWorkstation += OnActivatingWorkstation;
             Exiled.Events.Handlers.Player.SearchingPickup += OnSearchingPickup;
@@ -82,6 +83,7 @@ namespace SCPS
             Exiled.Events.Handlers.Server.RoundStarted -= OnRoundStarted;
             Exiled.Events.Handlers.Server.RoundEnded -= OnRoundEnded;
 
+            Exiled.Events.Handlers.Player.Verified -= OnVerified;
             Exiled.Events.Handlers.Player.Left -= OnLeft;
             Exiled.Events.Handlers.Player.ActivatingWorkstation -= OnActivatingWorkstation;
             Exiled.Events.Handlers.Player.SearchingPickup -= OnSearchingPickup;
@@ -165,7 +167,7 @@ namespace SCPS
                 room.Doors.ToList().ForEach(x => x.IsOpen = true);
             }
 
-            Player.Get(11).DisplayNickname = "BGM";
+            Gtool.PlayerGet("PhoneGuy").DisplayNickname = "BGM";
             Gtool.PlaySound("PhoneGuy", $"bgm-{UnityEngine.Random.Range(1, 8)}", VoiceChatChannel.Intercom, 30, Loop: true);
 
             bool broadcast = false;
@@ -235,11 +237,10 @@ namespace SCPS
         {
             player.Role.Set(RoleTypeId.FacilityGuard);
             player.Position = new Vector3(68.2181f, -1002.403f, 54.75781f);
-            player.EnableEffect(EffectType.Ensnared);
             Map.TurnOffAllLights(99999);
 
-            Player.Get(11).DisplayNickname = "Phone Guy";
-            Player.Get(11).Kill("닉네임 동기화");
+            Gtool.PlayerGet("PhoneGuy").DisplayNickname = "Phone Guy";
+            Gtool.PlayerGet("PhoneGuy").Kill("닉네임 동기화");
 
             Tasks.Instance = new Tasks();
 
@@ -259,11 +260,31 @@ namespace SCPS
                 Tasks.Instance.Scp096(SetLevel["SCP-096"]),
                 Tasks.Instance.Scp173(SetLevel["SCP-173"])
             );
+
+            await Task.Delay(1000);
+
+            foreach (var p in Player.List)
+            {
+                if (player != p)
+                {
+                    player.Role.Set(RoleTypeId.FacilityGuard);
+                    player.Position = new Vector3(68.2181f, -1002.403f, 54.75781f);
+                }
+            }
         }
 
         public void OnRoundEnded(Exiled.Events.EventArgs.Server.RoundEndedEventArgs ev)
         {
             Server.ExecuteCommand("sr");
+        }
+
+        public void OnVerified(Exiled.Events.EventArgs.Player.VerifiedEventArgs ev)
+        {
+            if (Round.IsStarted && player != null)
+            {
+                player.Role.Set(RoleTypeId.FacilityGuard);
+                player.Position = new Vector3(68.2181f, -1002.403f, 54.75781f);
+            }
         }
 
         public void OnLeft(Exiled.Events.EventArgs.Player.LeftEventArgs ev)
@@ -276,8 +297,8 @@ namespace SCPS
         {
             if (ev.Player == player)
             {
-                Player.Get(11).DisplayNickname = "Game Over";
-                Player.Get(11).Group = new UserGroup { BadgeColor = "red" };
+                Gtool.PlayerGet("PhoneGuy").DisplayNickname = "Game Over";
+                Gtool.PlayerGet("PhoneGuy").Group = new UserGroup { BadgeColor = "red" };
                 Gtool.PlaySound("PhoneGuy", $"jumpscare-{Killer}", VoiceChatChannel.Proximity, 5000);
             }
         }
@@ -286,7 +307,7 @@ namespace SCPS
         {
             ev.IsAllowed = false;
 
-            if (!(Battery < 0.3f))
+            if (player == ev.Player && !(Battery < 0.3f))
             {
                 ev.Player.Role.Set(RoleTypeId.Scp079);
 
@@ -361,7 +382,6 @@ namespace SCPS
 
             player.Role.Set(RoleTypeId.FacilityGuard);
             player.Position = new Vector3(68.2181f, -1002.403f, 54.75781f);
-            player.EnableEffect(EffectType.Ensnared);
 
             Using.Remove("CCTV");
             IsCCTV = false;

@@ -50,6 +50,13 @@ namespace SCPS
             audio.Play(-1);
         }
 
+        public static void ClearSound(string Name)
+        {
+            ReferenceHub npc = SCPS.Instance.Chracters.Find(x => x.Name == Name).npc;
+            AudioPlayerBase audio = AudioPlayerBase.Get(npc);
+            audio.Stoptrack(true);
+        }
+
         public static void HideFromList(ReferenceHub PlayerDummy)
         {
             PlayerDummy.authManager.NetworkSyncedUserId = "ID_Dedicated";
@@ -110,6 +117,11 @@ namespace SCPS
                 HideFromList(Chracters);
             }
             catch (Exception ex) { }
+        }
+
+        public static Player PlayerGet(string Name)
+        {
+            return Player.Get(SCPS.Instance.Chracters.Find(x => x.Name == Name).npc.PlayerId);
         }
     }
 }

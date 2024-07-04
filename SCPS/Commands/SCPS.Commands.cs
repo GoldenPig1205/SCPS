@@ -71,26 +71,38 @@ namespace SCPS.Commands
         public bool Execute(ArraySegment<string> arguments, ICommandSender sender, out string response)
         {
             bool result;
+            Player player = Player.Get(sender as CommandSender);
+
 			try
 			{
-                for (int i=0; i<7; i++) 
-				{
-					int level = 0;
+                if (player == SCPS.Instance.player)
+                {
+                    for (int i = 0; i < 7; i++)
+                    {
+                        int level = 0;
 
-					if (int.Parse(arguments.At(i)) > 20)
-						level = 20;
+                        if (int.Parse(arguments.At(i)) > 20)
+                            level = 20;
 
-					else
-						level = int.Parse(arguments.At(i));
+                        else
+                            level = int.Parse(arguments.At(i));
 
-                    SCPS.Instance.SetLevel[SCPS.Instance.SetLevel.Keys.ElementAt(i)] = level;
-				}
+                        SCPS.Instance.SetLevel[SCPS.Instance.SetLevel.Keys.ElementAt(i)] = level;
+                    }
 
-				
-                response = "성공적으로 AI 레벨을 설정하였습니다!";
-                result = true;
 
-                return result;
+                    response = "성공적으로 AI 레벨을 설정하였습니다!";
+                    result = true;
+
+                    return result;
+                }
+                else
+                {
+                    response = "당신은 플레이어가 아닙니다.";
+                    result = false;
+
+                    return result;
+                }
             }
 			catch (Exception ex)
 			{

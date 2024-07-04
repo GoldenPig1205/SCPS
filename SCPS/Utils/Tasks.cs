@@ -23,7 +23,7 @@ namespace SCPS
 
         public async Task PhoneGuy()
         {
-            Gtool.PlaySound("PhoneGuy", $"", VoiceChatChannel.None, 15);
+            Gtool.ClearSound("PhoneGuy");
         }
 
         public async Task Sync079andBattery()
@@ -133,7 +133,7 @@ namespace SCPS
 
             if (!SCPS.Instance.IsEnd)
             {
-                Player.Get(11).DisplayNickname = "Congratulations!";
+                Gtool.PlayerGet("PhoneGuy").DisplayNickname = "Congratulations!";
                 Gtool.PlaySound("PhoneGuy", $"fnaf-end", VoiceChatChannel.Intercom, 30);
 
                 SCPS.Instance.IsEnd = true;
@@ -176,7 +176,7 @@ namespace SCPS
                 {
                     await Task.Delay(1000);
 
-                    int rn = UnityEngine.Random.Range(level, Player.Get(5).CurrentRoom != Gtool.CameraRoom() ? 26 : 41);
+                    int rn = UnityEngine.Random.Range(level, Gtool.PlayerGet("Scp049").CurrentRoom != Gtool.CameraRoom() ? 26 : 41);
 
                     if (rn == 25)
                     {
@@ -253,7 +253,7 @@ namespace SCPS
                 {
                     await Task.Delay(1000);
 
-                    int rn = UnityEngine.Random.Range(level, Player.Get(9).CurrentRoom != Gtool.CameraRoom() ? 26 : 41);
+                    int rn = UnityEngine.Random.Range(level, Gtool.PlayerGet("Scp939").CurrentRoom != Gtool.CameraRoom() ? 26 : 41);
 
                     if (rn == 25)
                     {
@@ -376,7 +376,7 @@ namespace SCPS
                 {
                     await Task.Delay(1000);
 
-                    int rn = UnityEngine.Random.Range(level, Player.Get(13).CurrentRoom != Gtool.CameraRoom() ? 35 : 60);
+                    int rn = UnityEngine.Random.Range(level, Gtool.PlayerGet("Scp106").CurrentRoom != Gtool.CameraRoom() ? 35 : 60);
 
                     if (rn == 29)
                     {
@@ -540,7 +540,7 @@ namespace SCPS
 
                     if (rn == 25)
                     {
-                        if (Player.Get(17).CurrentRoom == Gtool.CameraRoom() && !SCPS.Instance.IsEnd)
+                        if (Gtool.PlayerGet("Scp096").CurrentRoom == Gtool.CameraRoom() && !SCPS.Instance.IsEnd)
                         {
                             SCPS.Instance.Killer = "Scp096";
                             Player.List.ToList().ForEach(x => x.Kill("SCP-096이 당신을 無로 되돌렸습니다."));
@@ -592,7 +592,7 @@ namespace SCPS
                 {
                     await Task.Delay(2000);
 
-                    int rn = UnityEngine.Random.Range(level, Player.Get(19).CurrentRoom != Gtool.CameraRoom() ? 26 : 41);
+                    int rn = UnityEngine.Random.Range(level, Gtool.PlayerGet("Scp173").CurrentRoom != Gtool.CameraRoom() ? 26 : 41);
 
                     if (rn == 25)
                     {
