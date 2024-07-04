@@ -171,7 +171,7 @@ namespace SCPS
             Gtool.PlaySound("PhoneGuy", $"bgm-{UnityEngine.Random.Range(1, 8)}", VoiceChatChannel.Intercom, 30, Loop: true);
 
             bool broadcast = false;
-            int time = 10;
+            int time = 50;
 
             while (Round.IsLobby)
             {
