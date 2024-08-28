@@ -266,28 +266,29 @@ namespace SCPS
 
             while (true)
             {
-                ReferenceHub Scp049Dummy = Chracters.Find(x => x.Name == "Scp049Dummy").npc;
-                // Scp049Dummy.transform.localScale = Vector3.one * -0.01f;
-
-                foreach (var p in Player.List)
+                try
                 {
-                    if (!p.IsNPC)
+                    ReferenceHub Scp049Dummy = Chracters.Find(x => x.Name == "Scp049Dummy").npc;
+                    // Scp049Dummy.transform.localScale = Vector3.one * -0.01f;
+
+                    foreach (var p in Player.List)
                     {
-                        if (p.Role.Type == RoleTypeId.Spectator)
+                        if (!p.IsNPC)
                         {
-                            p.Role.Set(RoleTypeId.FacilityGuard);
-                            p.Position = new Vector3(68.2181f, -1002.403f, 54.75781f);
-                        }
+                            if (p.Role.Type == RoleTypeId.Spectator)
+                            {
+                                p.Role.Set(RoleTypeId.FacilityGuard);
+                                p.Position = new Vector3(68.2181f, -1002.403f, 54.75781f);
+                            }
+                        };
+                    }
 
-                        Server.SendSpawnMessage.Invoke(null, new object[]
-                        {
-                                Scp049Dummy.netIdentity,
-                                p.Connection
-                        });
-                    };
+                    await Task.Delay(1000);
                 }
-
-                await Task.Delay(1000);
+                catch (Exception e)
+                {
+                    Log.Error(e.Message);
+                }
             }
         }
 

@@ -95,12 +95,11 @@ namespace SCPS
 
                             s0p.Role.Set(RoleTypeId.FacilityGuard);
                             s0p.Position = new Vector3(68.2181f, -1002.403f, 54.75781f);
-                            s0p.EnableEffect(EffectType.Ensnared);
                         }
 
                         foreach (var door in Exiled.API.Features.Doors.BreakableDoor.List)
                         {
-                            door.ChangeLock(DoorLockType.Regular079);
+                            door.Lock(1000, DoorLockType.Regular079);
                             door.IsOpen = true;
                             SCPS.Instance.Using.Clear();
                         }
@@ -215,6 +214,18 @@ namespace SCPS
                         scp049dummy.TryOverridePosition(Stage[Phase][0], Vector3.zero);
                         Gtool.Rotate(scp049, Stage[Phase][1]);
 
+                        scp049dummy.authManager.UserId = "ID_Dedicated";
+                        scp049dummy.authManager.NetworkSyncedUserId = "ID_Dedicated";
+                        scp049dummy.characterClassManager.GodMode = true;
+                        scp049dummy.transform.localScale = Vector3.one * -0.01f;
+                        foreach (Player player in Player.List)
+                        {
+                            Server.SendSpawnMessage.Invoke(null, new object[]
+                            {
+                                scp049dummy.netIdentity,
+                                player.Connection
+                            });
+                        }
                         FirstPersonMovementModule fpcModule = (scp049dummy.roleManager.CurrentRole as FpcStandardRoleBase).FpcModule;
                         fpcModule.Position = scp049.transform.position + Vector3.up * 0.65f;
                         fpcModule.Motor.ReceivedPosition = new RelativePosition(scp049.transform.position + Vector3.up * 0.65f);

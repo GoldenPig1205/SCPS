@@ -27,7 +27,7 @@ namespace SCPS
 
         public static string ConventToAudioPath(string filename)
         {
-            return $"C:/Users/pkj73/AppData/Roaming/EXILED/Plugins/audio/{filename}.ogg";
+            return Paths.Plugins + $"/audio/{filename}.ogg";
         }
 
         public static Room CameraRoom()
