@@ -14,6 +14,7 @@ using MEC;
 using SCPSLAudioApi.AudioCore;
 using VoiceChat;
 using Exiled.API.Features.Items;
+using Exiled.API.Features.Roles;
 using CustomPlayerEffects;
 
 namespace SCPS
@@ -39,11 +40,11 @@ namespace SCPS
         };
         public Dictionary<string, string> Method = new Dictionary<string, string>()
         {
-            { "SCP-049", "난이도 : ★☆☆☆☆\n역병 의사라 불리는 그는 좌측 문에서 공격해올 것입니다. 가끔씩 혼잣말을 하거나 구두 소리를 냅니다. CCTV에서 빨간 점으로 표시되어 위치를 파악하기 쉽습니다." }, 
+            { "SCP-049", "난이도 : ★☆☆☆☆\n역병 의사라 불리는 그는 좌측 문에서 공격해올 것입니다. 가끔씩 혼잣말을 하거나 구두 소리를 냅니다." }, 
             { "SCP-939", "난이도 : ★★☆☆☆\n소리 없는 암살자입니다. 좌측 문에서 대기할 때 숨소리가 들립니다." }, 
             { "SCP-049-2", "난이도 : ★★☆☆☆\n앞쪽 환풍구를 통해서 당신에게 서서히 도달할 것입니다. 쓰러진 척 하는 연기가 속지 마십시오." }, 
             { "SCP-106", "난이도 : ★★★☆☆\n천천히 당신을 향해서 접근할 것입니다. 그는 시설 벽을 뚫고 당신에게 도달할 수 있습니다. 그를 막을 유일한 방법은, 그가 당신의 사무실에서 당신을 관찰하고 있을 때, 재빨리 CCTV를 SCP-106의 격리실로 옮긴 후, 스피커(v키)를 활성화하십시오." },
-            { "SCP-3114", "난이도 : ★★☆☆☆\n당신의 채취를 쫒아 오른쪽 환풍구로 도달할 것입니다. 그가 사무실에 나타났을 때 CCTV를 쳐다보십시오. 인간인 것을 들키지 않아야 합니다!" },
+            { "SCP-3114", "난이도 : ★★☆☆☆\n당신의 채취를 쫒아 오른쪽 환풍구로 도달하기 위해 이동할 때마다 괴성을 내질러 당신의 귀를 방해할 것입니다. 그가 사무실에 나타났을 때 CCTV를 쳐다봄으로써 그를 속일 수 있습니다." },
             { "SCP-096", "난이도 : ★★★★☆\n그는 당신이 그의 얼굴을 \"확인\"하기 전까지는 절대로 해치지 않습니다. CCTV로 그를 발견했을 경우 최대한 빠르게 우회하십시오." },
             { "SCP-173", "난이도 : ★★★★★\n매우 재빠른 이 개체는 당신의 사무실로 돌진까지 4단계의 준비 과정이 있습니다. 그가 자신의 방을 떠난 경우 최대한 빠르게 문을 닫으십시오." }
         };
@@ -329,6 +330,9 @@ namespace SCPS
                 Player.Get(pd.PlayerId).CustomName = ev.Player.DisplayNickname;
 
                 Using.Add("CCTV");
+
+                if (ev.Player.Role is Scp079Role scp079)
+                    scp079.AddExperience(1205);
             }
         }
 

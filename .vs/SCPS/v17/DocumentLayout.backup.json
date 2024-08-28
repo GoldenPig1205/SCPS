@@ -3,12 +3,16 @@
   "WorkspaceRootPath": "D:\\GoldenPig1205\\Visual Studio 2022\\SCPS\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{E0236B73-5982-4A64-8A41-F41A6D78FA34}|SCPS.csproj|D:\\GoldenPig1205\\Visual Studio 2022\\SCPS\\scps\\utils\\tasks.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "AbsoluteMoniker": "D:0:0:{E0236B73-5982-4A64-8A41-F41A6D78FA34}|SCPS.csproj|d:\\goldenpig1205\\visual studio 2022\\scps\\scps\\utils\\tasks.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{E0236B73-5982-4A64-8A41-F41A6D78FA34}|SCPS.csproj|solutionrelative:scps\\utils\\tasks.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{E0236B73-5982-4A64-8A41-F41A6D78FA34}|SCPS.csproj|d:\\goldenpig1205\\visual studio 2022\\scps\\scps\\scps.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{E0236B73-5982-4A64-8A41-F41A6D78FA34}|SCPS.csproj|solutionrelative:scps\\scps.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{E0236B73-5982-4A64-8A41-F41A6D78FA34}|SCPS.csproj|D:\\GoldenPig1205\\Visual Studio 2022\\SCPS\\scps\\commands\\scps.commands.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{E0236B73-5982-4A64-8A41-F41A6D78FA34}|SCPS.csproj|solutionrelative:scps\\commands\\scps.commands.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{E0236B73-5982-4A64-8A41-F41A6D78FA34}|SCPS.csproj|D:\\GoldenPig1205\\Visual Studio 2022\\SCPS\\scps\\utils\\extensions.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{E0236B73-5982-4A64-8A41-F41A6D78FA34}|SCPS.csproj|solutionrelative:scps\\utils\\extensions.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{E0236B73-5982-4A64-8A41-F41A6D78FA34}|SCPS.csproj|D:\\GoldenPig1205\\Visual Studio 2022\\SCPS\\scps\\utils\\chracters.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
@@ -19,12 +23,8 @@
       "RelativeMoniker": "D:0:0:{E0236B73-5982-4A64-8A41-F41A6D78FA34}|SCPS.csproj|solutionrelative:scps\\utils\\gtool.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{E0236B73-5982-4A64-8A41-F41A6D78FA34}|SCPS.csproj|D:\\GoldenPig1205\\Visual Studio 2022\\SCPS\\scps\\utils\\extensions.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{E0236B73-5982-4A64-8A41-F41A6D78FA34}|SCPS.csproj|solutionrelative:scps\\utils\\extensions.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{E0236B73-5982-4A64-8A41-F41A6D78FA34}|SCPS.csproj|D:\\GoldenPig1205\\Visual Studio 2022\\SCPS\\scps\\commands\\scps.commands.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{E0236B73-5982-4A64-8A41-F41A6D78FA34}|SCPS.csproj|solutionrelative:scps\\commands\\scps.commands.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{E0236B73-5982-4A64-8A41-F41A6D78FA34}|SCPS.csproj|D:\\GoldenPig1205\\Visual Studio 2022\\SCPS\\scps\\scps.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{E0236B73-5982-4A64-8A41-F41A6D78FA34}|SCPS.csproj|solutionrelative:scps\\scps.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{E0236B73-5982-4A64-8A41-F41A6D78FA34}|SCPS.csproj|D:\\GoldenPig1205\\Visual Studio 2022\\SCPS\\scps\\configs\\config.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
@@ -42,13 +42,13 @@
           "Children": [
             {
               "$type": "Document",
-              "DocumentIndex": 1,
+              "DocumentIndex": 5,
               "Title": "SCPS.cs",
               "DocumentMoniker": "D:\\GoldenPig1205\\Visual Studio 2022\\SCPS\\SCPS\\SCPS.cs",
               "RelativeDocumentMoniker": "SCPS\\SCPS.cs",
               "ToolTip": "D:\\GoldenPig1205\\Visual Studio 2022\\SCPS\\SCPS\\SCPS.cs",
               "RelativeToolTip": "SCPS\\SCPS.cs",
-              "ViewState": "AgIAAP0AAAAAAAAAAAAUwBoBAAAaAAAAAAAAAA==",
+              "ViewState": "AgIAACQAAAAAAAAAAAAAACoAAABfAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2024-06-13T05:37:26.792Z",
               "EditorCaption": ""
@@ -61,31 +61,33 @@
               "RelativeDocumentMoniker": "SCPS\\Configs\\Config.cs",
               "ToolTip": "D:\\GoldenPig1205\\Visual Studio 2022\\SCPS\\SCPS\\Configs\\Config.cs",
               "RelativeToolTip": "SCPS\\Configs\\Config.cs",
-              "ViewState": "AQIAAAAAAAAAAAAAAAAAAAsAAAAFAAAA",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAsAAAAFAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-06-13T05:37:39.601Z"
+              "WhenOpened": "2024-06-13T05:37:39.601Z",
+              "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 5,
+              "DocumentIndex": 1,
               "Title": "SCPS.Commands.cs",
               "DocumentMoniker": "D:\\GoldenPig1205\\Visual Studio 2022\\SCPS\\SCPS\\Commands\\SCPS.Commands.cs",
               "RelativeDocumentMoniker": "SCPS\\Commands\\SCPS.Commands.cs",
               "ToolTip": "D:\\GoldenPig1205\\Visual Studio 2022\\SCPS\\SCPS\\Commands\\SCPS.Commands.cs",
               "RelativeToolTip": "SCPS\\Commands\\SCPS.Commands.cs",
-              "ViewState": "AQIAAFgAAAAAAAAAAAAowGkAAAANAAAA",
+              "ViewState": "AgIAAFgAAAAAAAAAAAAowG0AAAAeAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-06-13T05:37:40.498Z"
+              "WhenOpened": "2024-06-13T05:37:40.498Z",
+              "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 2,
+              "DocumentIndex": 3,
               "Title": "Chracters.cs",
               "DocumentMoniker": "D:\\GoldenPig1205\\Visual Studio 2022\\SCPS\\SCPS\\Utils\\Chracters.cs",
               "RelativeDocumentMoniker": "SCPS\\Utils\\Chracters.cs",
               "ToolTip": "D:\\GoldenPig1205\\Visual Studio 2022\\SCPS\\SCPS\\Utils\\Chracters.cs",
               "RelativeToolTip": "SCPS\\Utils\\Chracters.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "ViewState": "AgIAAAYAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2024-06-13T05:37:43.735Z",
               "EditorCaption": ""
@@ -96,16 +98,16 @@
               "Title": "Tasks.cs",
               "DocumentMoniker": "D:\\GoldenPig1205\\Visual Studio 2022\\SCPS\\SCPS\\Utils\\Tasks.cs",
               "RelativeDocumentMoniker": "SCPS\\Utils\\Tasks.cs",
-              "ToolTip": "D:\\GoldenPig1205\\Visual Studio 2022\\SCPS\\SCPS\\Utils\\Tasks.cs",
-              "RelativeToolTip": "SCPS\\Utils\\Tasks.cs",
-              "ViewState": "AgIAAMIAAAAAAAAAAADwv+QAAAAZAAAAAAAAAA==",
+              "ToolTip": "D:\\GoldenPig1205\\Visual Studio 2022\\SCPS\\SCPS\\Utils\\Tasks.cs*",
+              "RelativeToolTip": "SCPS\\Utils\\Tasks.cs*",
+              "ViewState": "AgIAAJ4AAAAAAAAAAADwv7UAAAAVAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2024-06-13T05:37:45.692Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 4,
+              "DocumentIndex": 2,
               "Title": "Extensions.cs",
               "DocumentMoniker": "D:\\GoldenPig1205\\Visual Studio 2022\\SCPS\\SCPS\\Utils\\Extensions.cs",
               "RelativeDocumentMoniker": "SCPS\\Utils\\Extensions.cs",
@@ -118,13 +120,13 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 3,
+              "DocumentIndex": 4,
               "Title": "Gtool.cs",
               "DocumentMoniker": "D:\\GoldenPig1205\\Visual Studio 2022\\SCPS\\SCPS\\Utils\\Gtool.cs",
               "RelativeDocumentMoniker": "SCPS\\Utils\\Gtool.cs",
               "ToolTip": "D:\\GoldenPig1205\\Visual Studio 2022\\SCPS\\SCPS\\Utils\\Gtool.cs",
               "RelativeToolTip": "SCPS\\Utils\\Gtool.cs",
-              "ViewState": "AgIAADYAAAAAAAAAAAA1wGYAAABPAAAAAAAAAA==",
+              "ViewState": "AgIAAE4AAAAAAAAAAAAiwB0AAAAdAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2024-06-13T05:37:45.029Z",
               "EditorCaption": ""

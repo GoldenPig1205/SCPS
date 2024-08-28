@@ -99,7 +99,8 @@ namespace SCPS
 
                         foreach (var door in Exiled.API.Features.Doors.BreakableDoor.List)
                         {
-                            door.Lock(1000, DoorLockType.Regular079);
+                            if (!door.IsLocked)
+                                door.Lock(100, DoorLockType.Regular079);
                             door.IsOpen = true;
                             SCPS.Instance.Using.Clear();
                         }
@@ -151,7 +152,6 @@ namespace SCPS
 
         public async Task Scp049(int level)
         {
-
             List<List<Vector3>> Stage = new List<List<Vector3>>()
             {
                 new List<Vector3>() { new Vector3(38.65023f, -806.6f, 81.84583f), new Vector3(-1, -1, 1) },
@@ -231,7 +231,6 @@ namespace SCPS
                         fpcModule.Motor.ReceivedPosition = new RelativePosition(scp049.transform.position + Vector3.up * 0.65f);
                         fpcModule.Noclip.IsActive = true;
                     }
-
                 } 
                 catch (Exception ex)
                 {
