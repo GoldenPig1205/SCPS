@@ -136,9 +136,6 @@ namespace SCPS
                 room.Doors.ToList().ForEach(x => x.IsOpen = true);
             }
 
-            // Gtool.PlayerGet("PhoneGuy").DisplayNickname = "BGM";
-            // Gtool.PlaySound("PhoneGuy", $"bgm-{UnityEngine.Random.Range(1, 8)}", VoiceChatChannel.Intercom, 30, Loop: true);
-
             bool broadcast = false;
             int time = 30;
 
@@ -216,25 +213,6 @@ namespace SCPS
 
         public async void OnRoundStarted()
         {
-            ReferenceHub PlayerDummy = Gtool.Spawn(RoleTypeId.FacilityGuard, new Vector3(46.32286f, 0.91f, 64.23f));
-            ReferenceHub Scp049 = Gtool.Spawn(RoleTypeId.Scp049, new Vector3(38.65023f, -806.6f, 81.84583f));
-            ReferenceHub Scp049Dummy = Gtool.Spawn(RoleTypeId.ClassD, new Vector3(38.65023f, -806.6f, 81.84583f));
-            ReferenceHub Scp939 = Gtool.Spawn(RoleTypeId.Scp939, new Vector3(98.94531f, -998.655f, 93.27344f));
-            ReferenceHub PhoneGuy = Gtool.Spawn(RoleTypeId.ClassD, new Vector3(46.32286f, 0.91f, 64.23f));
-            ReferenceHub Scp106 = Gtool.Spawn(RoleTypeId.Scp106, new Vector3(28.48828f, -998.7513f, 152.0195f));
-            ReferenceHub Scp3114 = Gtool.Spawn(RoleTypeId.Scp3114, new Vector3(59f, -1004.276f, 67.01563f));
-            ReferenceHub Scp096 = Gtool.Spawn(RoleTypeId.Scp096, new Vector3(90.01107f, -999.0436f, 133.1367f));
-            ReferenceHub Scp173 = Gtool.Spawn(RoleTypeId.Scp173, new Vector3(46.17308f, -802.235f, 96.46692f));
-
-            Dictionary<ReferenceHub, string> register = new Dictionary<ReferenceHub, string>()
-            {
-                { PlayerDummy, "PlayerDummy" }, { Scp049, "Scp049" }, { Scp049Dummy, "Scp049Dummy" }, { Scp939, "Scp939" }, { PhoneGuy, "PhoneGuy" },
-                { Scp106, "Scp106" }, { Scp3114, "Scp3114" }, { Scp096, "Scp096" }, { Scp173, "Scp173" }
-            };
-
-            foreach (var reg in register)
-                Gtool.Register(reg.Key, reg.Value);
-
             foreach (var p in Player.List)
             {
                 if (!p.IsNPC)
@@ -279,6 +257,33 @@ namespace SCPS
             {
                 ev.Player.Role.Set(RoleTypeId.FacilityGuard);
                 ev.Player.Position = new Vector3(68.2181f, -1002.403f, 54.75781f);
+            }
+            else
+            {
+                if (Player.List.Where(x => !x.IsNPC).ToList().Count == 1)
+                {
+                    ReferenceHub PlayerDummy = Gtool.Spawn(RoleTypeId.FacilityGuard, new Vector3(46.32286f, 0.91f, 64.23f));
+                    ReferenceHub Scp049 = Gtool.Spawn(RoleTypeId.Scp049, new Vector3(38.65023f, -806.6f, 81.84583f));
+                    ReferenceHub Scp049Dummy = Gtool.Spawn(RoleTypeId.ClassD, new Vector3(38.65023f, -806.6f, 81.84583f));
+                    ReferenceHub Scp939 = Gtool.Spawn(RoleTypeId.Scp939, new Vector3(98.94531f, -998.655f, 93.27344f));
+                    ReferenceHub PhoneGuy = Gtool.Spawn(RoleTypeId.ClassD, new Vector3(46.32286f, 0.91f, 64.23f));
+                    ReferenceHub Scp106 = Gtool.Spawn(RoleTypeId.Scp106, new Vector3(28.48828f, -998.7513f, 152.0195f));
+                    ReferenceHub Scp3114 = Gtool.Spawn(RoleTypeId.Scp3114, new Vector3(59f, -1004.276f, 67.01563f));
+                    ReferenceHub Scp096 = Gtool.Spawn(RoleTypeId.Scp096, new Vector3(90.01107f, -999.0436f, 133.1367f));
+                    ReferenceHub Scp173 = Gtool.Spawn(RoleTypeId.Scp173, new Vector3(46.17308f, -802.235f, 96.46692f));
+
+                    Dictionary<ReferenceHub, string> register = new Dictionary<ReferenceHub, string>()
+                    {
+                        { PlayerDummy, "PlayerDummy" }, { Scp049, "Scp049" }, { Scp049Dummy, "Scp049Dummy" }, { Scp939, "Scp939" }, { PhoneGuy, "PhoneGuy" },
+                        { Scp106, "Scp106" }, { Scp3114, "Scp3114" }, { Scp096, "Scp096" }, { Scp173, "Scp173" }
+                    };
+
+                    foreach (var reg in register)
+                        Gtool.Register(reg.Key, reg.Value);
+
+                    Gtool.PlayerGet("PhoneGuy").DisplayNickname = "BGM";
+                    Gtool.PlaySound("PhoneGuy", $"bgm-{UnityEngine.Random.Range(1, 8)}", VoiceChatChannel.Intercom, 30, Loop: true);
+                }
             }
         }
 
