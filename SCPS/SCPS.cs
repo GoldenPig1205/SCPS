@@ -58,6 +58,7 @@ namespace SCPS
             Exiled.Events.Handlers.Server.RoundStarted += OnRoundStarted;
             Exiled.Events.Handlers.Server.RoundEnded += OnRoundEnded;
 
+            Exiled.Events.Handlers.Player.Verified += OnVerified;
             Exiled.Events.Handlers.Player.Left += OnLeft;
             Exiled.Events.Handlers.Player.ActivatingWorkstation += OnActivatingWorkstation;
             Exiled.Events.Handlers.Player.SearchingPickup += OnSearchingPickup;
@@ -82,6 +83,7 @@ namespace SCPS
             Exiled.Events.Handlers.Server.RoundStarted -= OnRoundStarted;
             Exiled.Events.Handlers.Server.RoundEnded -= OnRoundEnded;
 
+            Exiled.Events.Handlers.Player.Verified -= OnVerified;
             Exiled.Events.Handlers.Player.Left -= OnLeft;
             Exiled.Events.Handlers.Player.ActivatingWorkstation -= OnActivatingWorkstation;
             Exiled.Events.Handlers.Player.SearchingPickup -= OnSearchingPickup;
@@ -114,25 +116,6 @@ namespace SCPS
             Round.IsLocked = true;
             Server.ExecuteCommand($"/decontamination disable");
 
-            ReferenceHub PlayerDummy = Gtool.Spawn(RoleTypeId.FacilityGuard, new Vector3(46.32286f, 0.91f, 64.23f));
-            ReferenceHub Scp049 = Gtool.Spawn(RoleTypeId.Scp049, new Vector3(38.65023f, -806.6f, 81.84583f));
-            ReferenceHub Scp049Dummy = Gtool.Spawn(RoleTypeId.ClassD, new Vector3(38.65023f, -806.6f, 81.84583f));
-            ReferenceHub Scp939 = Gtool.Spawn(RoleTypeId.Scp939, new Vector3(98.94531f, -998.655f, 93.27344f));
-            ReferenceHub PhoneGuy = Gtool.Spawn(RoleTypeId.ClassD, new Vector3(46.32286f, 0.91f, 64.23f));
-            ReferenceHub Scp106 = Gtool.Spawn(RoleTypeId.Scp106, new Vector3(28.48828f, -998.7513f, 152.0195f));
-            ReferenceHub Scp3114 = Gtool.Spawn(RoleTypeId.Scp3114, new Vector3(59f, -1004.276f, 67.01563f));
-            ReferenceHub Scp096 = Gtool.Spawn(RoleTypeId.Scp096, new Vector3(90.01107f, -999.0436f, 133.1367f));
-            ReferenceHub Scp173 = Gtool.Spawn(RoleTypeId.Scp173, new Vector3(46.17308f, -802.235f, 96.46692f));
-
-            Dictionary<ReferenceHub, string> register = new Dictionary<ReferenceHub, string>()
-            {
-                { PlayerDummy, "PlayerDummy" }, { Scp049, "Scp049" }, { Scp049Dummy, "Scp049Dummy" }, { Scp939, "Scp939" }, { PhoneGuy, "PhoneGuy" },
-                { Scp106, "Scp106" }, { Scp3114, "Scp3114" }, { Scp096, "Scp096" }, { Scp173, "Scp173" }
-            };
-
-            foreach (var reg in register)
-                Gtool.Register(reg.Key, reg.Value);
-
             foreach (var window in Window.List)
             {
                 if (window.Room.name == "HCZ_079" && (window.Base.name == "Glass (1)" || window.Base.name == "Glass (2)"))
@@ -153,8 +136,8 @@ namespace SCPS
                 room.Doors.ToList().ForEach(x => x.IsOpen = true);
             }
 
-            Gtool.PlayerGet("PhoneGuy").DisplayNickname = "BGM";
-            Gtool.PlaySound("PhoneGuy", $"bgm-{UnityEngine.Random.Range(1, 8)}", VoiceChatChannel.Intercom, 30, Loop: true);
+            // Gtool.PlayerGet("PhoneGuy").DisplayNickname = "BGM";
+            // Gtool.PlaySound("PhoneGuy", $"bgm-{UnityEngine.Random.Range(1, 8)}", VoiceChatChannel.Intercom, 30, Loop: true);
 
             bool broadcast = false;
             int time = 30;
@@ -233,6 +216,25 @@ namespace SCPS
 
         public async void OnRoundStarted()
         {
+            ReferenceHub PlayerDummy = Gtool.Spawn(RoleTypeId.FacilityGuard, new Vector3(46.32286f, 0.91f, 64.23f));
+            ReferenceHub Scp049 = Gtool.Spawn(RoleTypeId.Scp049, new Vector3(38.65023f, -806.6f, 81.84583f));
+            ReferenceHub Scp049Dummy = Gtool.Spawn(RoleTypeId.ClassD, new Vector3(38.65023f, -806.6f, 81.84583f));
+            ReferenceHub Scp939 = Gtool.Spawn(RoleTypeId.Scp939, new Vector3(98.94531f, -998.655f, 93.27344f));
+            ReferenceHub PhoneGuy = Gtool.Spawn(RoleTypeId.ClassD, new Vector3(46.32286f, 0.91f, 64.23f));
+            ReferenceHub Scp106 = Gtool.Spawn(RoleTypeId.Scp106, new Vector3(28.48828f, -998.7513f, 152.0195f));
+            ReferenceHub Scp3114 = Gtool.Spawn(RoleTypeId.Scp3114, new Vector3(59f, -1004.276f, 67.01563f));
+            ReferenceHub Scp096 = Gtool.Spawn(RoleTypeId.Scp096, new Vector3(90.01107f, -999.0436f, 133.1367f));
+            ReferenceHub Scp173 = Gtool.Spawn(RoleTypeId.Scp173, new Vector3(46.17308f, -802.235f, 96.46692f));
+
+            Dictionary<ReferenceHub, string> register = new Dictionary<ReferenceHub, string>()
+            {
+                { PlayerDummy, "PlayerDummy" }, { Scp049, "Scp049" }, { Scp049Dummy, "Scp049Dummy" }, { Scp939, "Scp939" }, { PhoneGuy, "PhoneGuy" },
+                { Scp106, "Scp106" }, { Scp3114, "Scp3114" }, { Scp096, "Scp096" }, { Scp173, "Scp173" }
+            };
+
+            foreach (var reg in register)
+                Gtool.Register(reg.Key, reg.Value);
+
             foreach (var p in Player.List)
             {
                 if (!p.IsNPC)
@@ -264,38 +266,20 @@ namespace SCPS
                 Tasks.Instance.Scp096(SetLevel["SCP-096"]),
                 Tasks.Instance.Scp173(SetLevel["SCP-173"])
             );
-
-            while (true)
-            {
-                try
-                {
-                    ReferenceHub Scp049Dummy = Chracters.Find(x => x.Name == "Scp049Dummy").npc;
-                    // Scp049Dummy.transform.localScale = Vector3.one * -0.01f;
-
-                    foreach (var p in Player.List)
-                    {
-                        if (!p.IsNPC)
-                        {
-                            if (p.Role.Type == RoleTypeId.Spectator)
-                            {
-                                p.Role.Set(RoleTypeId.FacilityGuard);
-                                p.Position = new Vector3(68.2181f, -1002.403f, 54.75781f);
-                            }
-                        };
-                    }
-
-                    await Task.Delay(1000);
-                }
-                catch (Exception e)
-                {
-                    Log.Error(e.Message);
-                }
-            }
         }
 
         public void OnRoundEnded(Exiled.Events.EventArgs.Server.RoundEndedEventArgs ev)
         {
             Server.ExecuteCommand("sr");
+        }
+
+        public void OnVerified(Exiled.Events.EventArgs.Player.VerifiedEventArgs ev)
+        {
+            if (!Round.IsLobby)
+            {
+                ev.Player.Role.Set(RoleTypeId.FacilityGuard);
+                ev.Player.Position = new Vector3(68.2181f, -1002.403f, 54.75781f);
+            }
         }
 
         public void OnLeft(Exiled.Events.EventArgs.Player.LeftEventArgs ev)
