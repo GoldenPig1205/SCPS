@@ -3,8 +3,8 @@
   "WorkspaceRootPath": "D:\\GoldenPig1205\\Visual Studio 2022\\SCPS\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{E0236B73-5982-4A64-8A41-F41A6D78FA34}|SCPS.csproj|d:\\goldenpig1205\\visual studio 2022\\scps\\scps\\scps.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{E0236B73-5982-4A64-8A41-F41A6D78FA34}|SCPS.csproj|solutionrelative:scps\\scps.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{E0236B73-5982-4A64-8A41-F41A6D78FA34}|SCPS.csproj|d:\\goldenpig1205\\visual studio 2022\\scps\\scps\\configs\\config.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{E0236B73-5982-4A64-8A41-F41A6D78FA34}|SCPS.csproj|solutionrelative:scps\\configs\\config.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{E0236B73-5982-4A64-8A41-F41A6D78FA34}|SCPS.csproj|D:\\GoldenPig1205\\Visual Studio 2022\\SCPS\\scps\\utils\\tasks.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
@@ -25,10 +25,6 @@
     {
       "AbsoluteMoniker": "D:0:0:{E0236B73-5982-4A64-8A41-F41A6D78FA34}|SCPS.csproj|D:\\GoldenPig1205\\Visual Studio 2022\\SCPS\\scps\\commands\\scps.commands.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{E0236B73-5982-4A64-8A41-F41A6D78FA34}|SCPS.csproj|solutionrelative:scps\\commands\\scps.commands.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{E0236B73-5982-4A64-8A41-F41A6D78FA34}|SCPS.csproj|D:\\GoldenPig1205\\Visual Studio 2022\\SCPS\\scps\\configs\\config.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{E0236B73-5982-4A64-8A41-F41A6D78FA34}|SCPS.csproj|solutionrelative:scps\\configs\\config.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     }
   ],
   "DocumentGroupContainers": [
@@ -43,19 +39,6 @@
             {
               "$type": "Document",
               "DocumentIndex": 0,
-              "Title": "SCPS.cs",
-              "DocumentMoniker": "D:\\GoldenPig1205\\Visual Studio 2022\\SCPS\\SCPS\\SCPS.cs",
-              "RelativeDocumentMoniker": "SCPS\\SCPS.cs",
-              "ToolTip": "D:\\GoldenPig1205\\Visual Studio 2022\\SCPS\\SCPS\\SCPS.cs*",
-              "RelativeToolTip": "SCPS\\SCPS.cs*",
-              "ViewState": "AgIAAAQBAAAAAAAAAAAmwBwBAABPAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-06-13T05:37:26.792Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 6,
               "Title": "Config.cs",
               "DocumentMoniker": "D:\\GoldenPig1205\\Visual Studio 2022\\SCPS\\SCPS\\Configs\\Config.cs",
               "RelativeDocumentMoniker": "SCPS\\Configs\\Config.cs",
@@ -63,7 +46,8 @@
               "RelativeToolTip": "SCPS\\Configs\\Config.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAsAAAAFAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-06-13T05:37:39.601Z"
+              "WhenOpened": "2024-06-13T05:37:39.601Z",
+              "EditorCaption": ""
             },
             {
               "$type": "Document",
@@ -87,8 +71,7 @@
               "RelativeToolTip": "SCPS\\Utils\\Chracters.cs",
               "ViewState": "AgIAAAYAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-06-13T05:37:43.735Z",
-              "EditorCaption": ""
+              "WhenOpened": "2024-06-13T05:37:43.735Z"
             },
             {
               "$type": "Document",
@@ -100,8 +83,7 @@
               "RelativeToolTip": "SCPS\\Utils\\Tasks.cs",
               "ViewState": "AgIAAA0AAAAAAAAAAAAAAPcAAAB/AAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-06-13T05:37:45.692Z",
-              "EditorCaption": ""
+              "WhenOpened": "2024-06-13T05:37:45.692Z"
             },
             {
               "$type": "Document",
