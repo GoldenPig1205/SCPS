@@ -10,18 +10,31 @@ using Exiled.API.Enums;
 using UnityEngine;
 using PlayerRoles.FirstPersonControl;
 using PlayerRoles;
-using MEC;
-using SCPSLAudioApi.AudioCore;
-using VoiceChat;
 using Exiled.API.Features.Items;
 using Exiled.API.Features.Roles;
 using CustomPlayerEffects;
+using GG.Core.Panel;
+using GG.Core.Effects;
+using SCPS.Locations;
+using SCPS.Panel;
+using SCPS.Progress;
+using MultiBroadcast.API;
 
 namespace SCPS
 {
     public class SCPS : Plugin<Config>
     {
+        private const int FixedMapSeed = 1205;
+
         public static SCPS Instance;
+
+        public ScpsLocationService Locations { get; private set; }
+        public ScpsProgressStore Progress { get; private set; }
+        public int ActiveNight { get; private set; }
+        public bool IsCustomNight { get; private set; }
+
+        private readonly object roundStartLock = new object();
+        private readonly HashSet<string> clearEligiblePlayers = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
         public List<Chracters> Chracters = new List<Chracters>();
 
@@ -53,7 +66,12 @@ namespace SCPS
         public override void OnEnabled()
         {
             Instance = this;
+            Locations = new ScpsLocationService();
+            Progress = new ScpsProgressStore(Locations.RootDirectory);
+            Progress.Initialize();
+            PanelPackageRegistry.Register(new ScpsPanelPackage(Config, Locations, Progress, this).Create());
 
+            Exiled.Events.Handlers.Map.Generating += OnMapGenerating;
             Exiled.Events.Handlers.Server.WaitingForPlayers += OnWaitingForPlayers;
             Exiled.Events.Handlers.Server.RoundStarted += OnRoundStarted;
             Exiled.Events.Handlers.Server.RoundEnded += OnRoundEnded;
@@ -75,10 +93,17 @@ namespace SCPS
             Exiled.Events.Handlers.Scp079.ChangingCamera += OnChangingCamera;
 
             Exiled.Events.Handlers.Scp096.AddingTarget += OnAddingTarget;
+
+            base.OnEnabled();
         }
 
         public override void OnDisabled()
         {
+            IsEnd = true;
+            Tasks.Instance = null;
+            PanelPackageRegistry.Unregister(ScpsPanelPackage.Id);
+
+            Exiled.Events.Handlers.Map.Generating -= OnMapGenerating;
             Exiled.Events.Handlers.Server.WaitingForPlayers -= OnWaitingForPlayers;
             Exiled.Events.Handlers.Server.RoundStarted -= OnRoundStarted;
             Exiled.Events.Handlers.Server.RoundEnded -= OnRoundEnded;
@@ -101,13 +126,25 @@ namespace SCPS
 
             Exiled.Events.Handlers.Scp096.AddingTarget -= OnAddingTarget;
 
+            Gtool.ClearAllSounds();
+            Chracters.Clear();
+            Progress?.SaveAll();
+            Progress = null;
+            Locations = null;
             Instance = null;
+            base.OnDisabled();
+        }
+
+        public void OnMapGenerating(Exiled.Events.EventArgs.Map.GeneratingEventArgs ev)
+        {
+            ev.Seed = FixedMapSeed;
+            Map.Seed = FixedMapSeed;
         }
 
         public async void OnWaitingForPlayers()
         {
+            ResetRoundState();
             Map.CleanAllItems();
-            Server.ExecuteCommand("/mp load SCPS");
 
             while (Player.List.Count < 1)
                 await Task.Delay(1000);
@@ -137,7 +174,6 @@ namespace SCPS
             }
 
             bool broadcast = false;
-            int time = 30;
 
             while (Round.IsLobby)
             {
@@ -146,21 +182,10 @@ namespace SCPS
                     if (!broadcast)
                     {
                         foreach (var p in Player.List)
-                            p.Broadcast(300, "<size=20><b>당신은 <color=red>SCP-079</color>의 전력을 제한하고 게이트를 여는 등 희생을 자처했지만, 모두가 탈출한 <color=#BDBDBD>Site-02</color> 기지에 홀로 버려졌습니다.\n" +
+                            p.AddBroadcast(300, "<size=20><b>당신은 <color=red>SCP-079</color>의 전력을 제한하고 게이트를 여는 등 희생을 자처했지만, 모두가 탈출한 <color=#BDBDBD>Site-02</color> 기지에 홀로 버려졌습니다.\n" +
                                                 "이제 시설에 남겨진 것은 <u><color=#FACC2E>제한된 전력</color></u>과 <i>당신의 친구 <color=red>SCP-079</color></i>, <u><color=#58ACFA>사무실</color></u> 뿐입니다.\n" +
                                                 "약속된 지원의 시간은 새벽 6시, 그때까지 최대한 버텨내야만 합니다.</b></size>");
                         broadcast = true;
-                    }
-
-                    time -= 1;
-
-                    if (time == 0 && !IsSetLevel)
-                    {
-                        for (int i = 0; i < 7; i++)
-                        {
-                            int level = UnityEngine.Random.Range(0, UnityEngine.Random.Range(5, UnityEngine.Random.Range(10, UnityEngine.Random.Range(15, 21))));
-                            SetLevel[SetLevel.Keys.ElementAt(i)] = level;
-                        }
                     }
 
                     string output = "";
@@ -170,31 +195,16 @@ namespace SCPS
                         output += $"<color=red>{item.Key}</color> : {item.Value}\n";
                     }
 
-                    string Note()
-                    {
-                        if (time == 0)
-                        {
-                            return $"<color=#B40404>곧 게임이 시작됩니다..</color>";
-                        }
-                        else
-                        {
-                            return $"{time}초 뒤 게임이 자동으로 시작됩니다.";
-                        }
-                    }
-
                     output = output.TrimEnd('\n');
                     foreach (var p in Player.List)
                     {
                         if (!p.IsNPC)
                         {
-                            p.ShowHint($"<align=left><b><size=50>A.I. Level</size></b>\n{output}</align>\n\n<color=orange>콘솔(~)을 열고 [.도움말] 명령어를 입력하세요.</color>\n\n<b>{Note()}</b>", 10);
+                            if (EffectDisplayModule.IsPanelOpen(p))
+                                p.ShowHint(string.Empty, 1);
+                            else
+                                p.ShowHint($"<align=left><b><size=50>A.I. Level</size></b>\n{output}</align>\n\n<color=#FACC2E>L키로 GG 패널을 열어 플레이할 밤을 선택하세요.</color>", 10);
                         }
-                    }
-                    if (time == 0)
-                    {
-                        await Task.Delay(8000);
-                        Round.Start();
-                        break;
                     }
                 }
 
@@ -213,24 +223,31 @@ namespace SCPS
 
         public async void OnRoundStarted()
         {
+            clearEligiblePlayers.Clear();
+            if (!IsCustomNight && ActiveNight >= 1 && ActiveNight <= 6)
+            {
+                foreach (Player player in Player.List.Where(player => !player.IsNPC))
+                {
+                    ScpsPlayerProgress profile = Progress.Get(player);
+                    if (profile.IsNightUnlocked(ActiveNight) && profile.HighestClearedNight < ActiveNight)
+                        clearEligiblePlayers.Add(player.UserId);
+                }
+            }
+
             foreach (var p in Player.List)
             {
                 if (!p.IsNPC)
                 {
                     p.Role.Set(RoleTypeId.FacilityGuard);
-                    p.Position = new Vector3(68.2181f, -1002.403f, 54.75781f);
+                    Gtool.Place(p, Locations.Get("guard.office"));
                 }
             }
             Map.TurnOffAllLights(99999);
-
-            Gtool.PlayerGet("PhoneGuy").DisplayNickname = "Phone Guy";
-            Gtool.PlayerGet("PhoneGuy").Kill("닉네임 동기화");
 
             Tasks.Instance = new Tasks();
 
             await Task.WhenAll
             (
-                Tasks.Instance.PhoneGuy(),
                 Tasks.Instance.Sync079andBattery(),
                 Tasks.Instance.Timer(),
                 Tasks.Instance.UsingBattery(),
@@ -248,58 +265,200 @@ namespace SCPS
 
         public void OnRoundEnded(Exiled.Events.EventArgs.Server.RoundEndedEventArgs ev)
         {
+            IsEnd = true;
+            Tasks.Instance = null;
+            Gtool.ClearAllSounds();
             Server.ExecuteCommand("sr");
+        }
+
+        private void ResetRoundState()
+        {
+            Tasks.Instance = null;
+            Gtool.ClearAllSounds();
+            Chracters.Clear();
+
+            sync = false;
+            IsSetLevel = false;
+            IsEnd = false;
+            IsFemur = false;
+            IsLookedatScp096 = false;
+            IsCCTV = false;
+            Battery = 100f;
+            Killer = null;
+            ActiveNight = 0;
+            IsCustomNight = false;
+            clearEligiblePlayers.Clear();
+
+            Using.Clear();
+            Using.Add("RedLightOnSR");
+
+            foreach (string key in SetLevel.Keys.ToArray())
+                SetLevel[key] = 0;
         }
 
         public void OnVerified(Exiled.Events.EventArgs.Player.VerifiedEventArgs ev)
         {
+            try
+            {
+                Progress.LoadOrCreate(ev.Player.UserId, ev.Player.Nickname);
+            }
+            catch (Exception exception)
+            {
+                Log.Error($"[SCPS] Failed to load progress for {ev.Player.UserId}: {exception}");
+            }
+
             if (!Round.IsLobby)
             {
                 ev.Player.Role.Set(RoleTypeId.FacilityGuard);
-                ev.Player.Position = new Vector3(68.2181f, -1002.403f, 54.75781f);
+                Gtool.Place(ev.Player, Locations.Get("guard.office"));
             }
             else
             {
                 if (Player.List.Where(x => !x.IsNPC).ToList().Count == 1)
                 {
-                    ReferenceHub PlayerDummy = Gtool.Spawn(RoleTypeId.FacilityGuard, new Vector3(46.32286f, 0.91f, 64.23f));
-                    ReferenceHub Scp049 = Gtool.Spawn(RoleTypeId.Scp049, new Vector3(38.65023f, -806.6f, 81.84583f));
-                    ReferenceHub Scp049Dummy = Gtool.Spawn(RoleTypeId.ClassD, new Vector3(38.65023f, -806.6f, 81.84583f));
-                    ReferenceHub Scp939 = Gtool.Spawn(RoleTypeId.Scp939, new Vector3(98.94531f, -998.655f, 93.27344f));
-                    ReferenceHub PhoneGuy = Gtool.Spawn(RoleTypeId.ClassD, new Vector3(46.32286f, 0.91f, 64.23f));
-                    ReferenceHub Scp106 = Gtool.Spawn(RoleTypeId.Scp106, new Vector3(28.48828f, -998.7513f, 152.0195f));
-                    ReferenceHub Scp3114 = Gtool.Spawn(RoleTypeId.Scp3114, new Vector3(59f, -1004.276f, 67.01563f));
-                    ReferenceHub Scp096 = Gtool.Spawn(RoleTypeId.Scp096, new Vector3(90.01107f, -999.0436f, 133.1367f));
-                    ReferenceHub Scp173 = Gtool.Spawn(RoleTypeId.Scp173, new Vector3(46.17308f, -802.235f, 96.46692f));
+                    ReferenceHub PlayerDummy = Gtool.Spawn(RoleTypeId.FacilityGuard, Locations.Get("dummy.hidden"));
+                    ReferenceHub Scp049 = Gtool.Spawn(RoleTypeId.Scp049, Locations.Get("scp049.spawn"));
+                    ReferenceHub Scp049Dummy = Gtool.Spawn(RoleTypeId.ClassD, Locations.Get("scp049.dummy"));
+                    ReferenceHub Scp939 = Gtool.Spawn(RoleTypeId.Scp939, Locations.Get("scp939.spawn"));
+                    ReferenceHub Scp106 = Gtool.Spawn(RoleTypeId.Scp106, Locations.Get("scp106.spawn"));
+                    ReferenceHub Scp3114 = Gtool.Spawn(RoleTypeId.Scp3114, Locations.Get("scp3114.spawn"));
+                    ReferenceHub Scp096 = Gtool.Spawn(RoleTypeId.Scp096, Locations.Get("scp096.spawn"));
+                    ReferenceHub Scp173 = Gtool.Spawn(RoleTypeId.Scp173, Locations.Get("scp173.spawn"));
 
                     Dictionary<ReferenceHub, string> register = new Dictionary<ReferenceHub, string>()
                     {
-                        { PlayerDummy, "PlayerDummy" }, { Scp049, "Scp049" }, { Scp049Dummy, "Scp049Dummy" }, { Scp939, "Scp939" }, { PhoneGuy, "PhoneGuy" },
+                        { PlayerDummy, "PlayerDummy" }, { Scp049, "Scp049" }, { Scp049Dummy, "Scp049Dummy" }, { Scp939, "Scp939" },
                         { Scp106, "Scp106" }, { Scp3114, "Scp3114" }, { Scp096, "Scp096" }, { Scp173, "Scp173" }
                     };
 
                     foreach (var reg in register)
                         Gtool.Register(reg.Key, reg.Value);
 
-                    Gtool.PlayerGet("PhoneGuy").DisplayNickname = "BGM";
-                    Gtool.PlaySound("PhoneGuy", $"bgm-{UnityEngine.Random.Range(1, 8)}", VoiceChatChannel.Intercom, 30, Loop: true);
+                    Gtool.PlayGlobalSound($"bgm-{UnityEngine.Random.Range(1, 8)}", 30, loop: true);
                 }
             }
         }
 
         public void OnLeft(Exiled.Events.EventArgs.Player.LeftEventArgs ev)
         {
+            Progress?.SaveAndUnload(ev.Player?.UserId);
             if (Player.List.Count < 1)
                 Server.ExecuteCommand("sr");
         }
 
+        public bool TryStartNight(Player requester, int night, IReadOnlyDictionary<string, int> customLevels, out string errorCode)
+        {
+            errorCode = string.Empty;
+            if (requester == null || requester.IsNPC || string.IsNullOrWhiteSpace(requester.UserId))
+            {
+                errorCode = "invalid-player";
+                return false;
+            }
+
+            lock (roundStartLock)
+            {
+                if (!Round.IsLobby || Round.IsStarted || IsSetLevel)
+                {
+                    errorCode = "already-starting";
+                    return false;
+                }
+
+                ScpsPlayerProgress profile = Progress.Get(requester);
+                bool custom = night == 0;
+                if (custom)
+                {
+                    if (!profile.IsCustomUnlocked)
+                    {
+                        errorCode = "custom-locked";
+                        return false;
+                    }
+
+                    if (customLevels == null)
+                    {
+                        errorCode = "missing-levels";
+                        return false;
+                    }
+
+                    foreach (string key in SetLevel.Keys.ToArray())
+                    {
+                        int value = customLevels.TryGetValue(key, out int level) ? level : 1;
+                        SetLevel[key] = Math.Max(1, Math.Min(20, value));
+                    }
+                }
+                else
+                {
+                    if (!profile.IsNightUnlocked(night))
+                    {
+                        errorCode = "night-locked";
+                        return false;
+                    }
+
+                    ScpsNightPreset preset = ScpsNightPreset.Find(Config.NightPresets, night);
+                    if (preset == null)
+                    {
+                        errorCode = "preset-missing";
+                        return false;
+                    }
+
+                    foreach (string key in SetLevel.Keys.ToArray())
+                        SetLevel[key] = preset.GetLevel(key);
+                }
+
+                ActiveNight = custom ? 0 : night;
+                IsCustomNight = custom;
+                IsSetLevel = true;
+                try
+                {
+                    Server.ExecuteCommand("/mp load SCPS");
+                    Round.Start();
+                    return true;
+                }
+                catch (Exception exception)
+                {
+                    Log.Error($"[SCPS] Failed to load the SCPS map or start the round: {exception}");
+                    ActiveNight = 0;
+                    IsCustomNight = false;
+                    IsSetLevel = false;
+                    foreach (string key in SetLevel.Keys.ToArray())
+                        SetLevel[key] = 0;
+                    errorCode = "start-failed";
+                    return false;
+                }
+            }
+        }
+
+        public void CompleteActiveNight()
+        {
+            if (IsCustomNight || ActiveNight < 1 || ActiveNight > 6 || Progress == null)
+                return;
+
+            foreach (Player player in Player.List.Where(player => !player.IsNPC && player.IsAlive).ToArray())
+            {
+                if (!clearEligiblePlayers.Contains(player.UserId))
+                    continue;
+
+                try
+                {
+                    if (Progress.MarkNightCleared(player, ActiveNight))
+                    {
+                        player.AddBroadcast(10, $"<size=30><color=#80F537><b>{ActiveNight}일밤 클리어!</b></color></size>");
+                        Log.Info($"[SCPS] {player.Nickname} ({player.UserId}) cleared Night {ActiveNight}.");
+                    }
+                }
+                catch (Exception exception)
+                {
+                    Log.Error($"[SCPS] Failed to save Night {ActiveNight} clear for {player.UserId}: {exception}");
+                }
+            }
+
+            clearEligiblePlayers.Clear();
+        }
+
         public void OnDied(Exiled.Events.EventArgs.Player.DiedEventArgs ev)
         {
-            if (!ev.Player.IsNPC)
+            if (!ev.Player.IsNPC && !string.IsNullOrWhiteSpace(Killer))
             {
-                Gtool.PlayerGet("PhoneGuy").DisplayNickname = "Game Over";
-                Gtool.PlayerGet("PhoneGuy").Group = new UserGroup { BadgeColor = "red" };
-                Gtool.PlaySound("PhoneGuy", $"jumpscare-{Killer}", VoiceChatChannel.Proximity, 5000);
+                Gtool.PlayGlobalSound($"jumpscare-{Killer}", 5000);
             }
         }
 
@@ -314,8 +473,7 @@ namespace SCPS
                 ev.Player.Role.Set(RoleTypeId.Scp079);
 
                 ReferenceHub pd = Chracters.Find(x => x.Name == "PlayerDummy").npc;
-                pd.TryOverridePosition(new Vector3(68.2181f, -1002.403f, 54.75781f), Vector3.zero);
-                Gtool.Rotate(pd, new Vector3(1, -2, 2));
+                Gtool.Place(pd, Locations.Get("guard.office"));
                 Player.Get(pd.PlayerId).CustomName = ev.Player.DisplayNickname;
 
                 Using.Add("CCTV");
@@ -372,7 +530,11 @@ namespace SCPS
         public void OnSpawned(Exiled.Events.EventArgs.Player.SpawnedEventArgs ev)
         {
             if (ev.Player.Role.Type == RoleTypeId.FacilityGuard)
+            {
                 ev.Player.ClearInventory();
+                if (!ev.Player.IsNPC)
+                    Gtool.Place(ev.Player, Locations.Get("guard.office"));
+            }
         }
 
         public void OnDroppingItem(Exiled.Events.EventArgs.Player.DroppingItemEventArgs ev)
@@ -383,10 +545,10 @@ namespace SCPS
         public void OnPinging(Exiled.Events.EventArgs.Scp079.PingingEventArgs ev)
         {
             ReferenceHub pd = Chracters.Find(x => x.Name == "PlayerDummy").npc;
-            pd.TryOverridePosition(new Vector3(46.32286f, 0.91f, 64.23f), Vector3.zero);
+            Gtool.Place(pd, Locations.Get("dummy.hidden"));
 
             ev.Player.Role.Set(RoleTypeId.FacilityGuard);
-            ev.Player.Position = new Vector3(68.2181f, -1002.403f, 54.75781f);
+            Gtool.Place(ev.Player, Locations.Get("guard.office"));
 
             Using.Remove("CCTV");
             IsCCTV = false;

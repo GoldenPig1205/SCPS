@@ -1,23 +1,24 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using UnityEngine;
 using Exiled.API.Features;
-using Exiled.API.Features.Components;
-using Mirror;
 using PlayerRoles.FirstPersonControl;
 using PlayerRoles;
-using MEC;
-using SCPSLAudioApi.AudioCore;
 using VoiceChat;
 using Exiled.API.Features.Roles;
+using SCPS.Locations;
 
 namespace SCPS
 {
     public class Gtool
     {
+        private const string MainSpeakerName = "Main";
+        private const string GlobalAudioName = "Global";
+        private static readonly Dictionary<string, AudioPlayer> AudioPlayers =
+            new Dictionary<string, AudioPlayer>(StringComparer.OrdinalIgnoreCase);
+
         public static object GetRandomValue(List<object> list)
         {
             System.Random random = new System.Random();
@@ -43,20 +44,112 @@ namespace SCPS
 
         public static void PlaySound(string Name, string AudioFileName, VoiceChatChannel BroadcastChannel = VoiceChatChannel.Proximity, int Volume = 100, bool Loop = false)
         {
-            ReferenceHub npc = SCPS.Instance.Chracters.Find(x => x.Name == Name).npc;
-            AudioPlayerBase audio = AudioPlayerBase.Get(npc);
-            audio.BroadcastChannel = BroadcastChannel;
-            audio.CurrentPlay = ConventToAudioPath(AudioFileName);
-            audio.Volume = Volume;
-            audio.Loop = Loop;
-            audio.Play(-1);
+            Chracters character = SCPS.Instance?.Chracters.Find(x => x.Name == Name);
+            if (character?.npc == null)
+                return;
+
+            string clipPath = ConventToAudioPath(AudioFileName);
+            if (!File.Exists(clipPath))
+            {
+                Log.Warn($"[SCPS] Audio file was not found: {clipPath}");
+                return;
+            }
+
+            if (!AudioClipStorage.AudioClips.ContainsKey(AudioFileName))
+                AudioClipStorage.LoadClip(clipPath, AudioFileName);
+
+            AudioPlayer audio = GetOrCreateAudioPlayer(Name, character.npc);
+            if (audio == null)
+                return;
+
+            if (audio.TryGetSpeaker(MainSpeakerName, out Speaker speaker))
+                speaker.IsSpatial = BroadcastChannel != VoiceChatChannel.Intercom;
+
+            audio.RemoveAllClips();
+            audio.AddClip(AudioFileName, Math.Max(0f, Volume / 100f), Loop, !Loop);
         }
+
+        public static void PlayGlobalSound(string audioFileName, int volume = 100, bool loop = false)
+        {
+            string clipPath = ConventToAudioPath(audioFileName);
+            if (!File.Exists(clipPath))
+            {
+                Log.Warn($"[SCPS] Audio file was not found: {clipPath}");
+                return;
+            }
+
+            if (!AudioClipStorage.AudioClips.ContainsKey(audioFileName))
+                AudioClipStorage.LoadClip(clipPath, audioFileName);
+
+            AudioPlayer audio = GetOrCreateGlobalAudioPlayer();
+            if (audio == null)
+                return;
+
+            audio.RemoveAllClips();
+            audio.AddClip(audioFileName, Math.Max(0f, volume / 100f), loop, !loop);
+        }
+
+        public static void ClearGlobalSound()
+            => ClearSound(GlobalAudioName);
 
         public static void ClearSound(string Name)
         {
-            ReferenceHub npc = SCPS.Instance.Chracters.Find(x => x.Name == Name).npc;
-            AudioPlayerBase audio = AudioPlayerBase.Get(npc);
-            audio.Stoptrack(true);
+            if (AudioPlayers.TryGetValue(Name, out AudioPlayer audio))
+                audio.RemoveAllClips();
+        }
+
+        public static void ClearAllSounds()
+        {
+            foreach (AudioPlayer audio in AudioPlayers.Values)
+                audio?.Destroy();
+
+            AudioPlayers.Clear();
+        }
+
+        private static AudioPlayer GetOrCreateAudioPlayer(string name, ReferenceHub npc)
+        {
+            if (AudioPlayers.TryGetValue(name, out AudioPlayer existing) && existing != null)
+                return existing;
+
+            Transform source = npc.transform;
+            AudioPlayer created = AudioPlayer.CreateOrGet(
+                $"SCPS - {name}",
+                condition: hub => Player.Get(hub) != null,
+                onIntialCreation: player =>
+                {
+                    player.transform.parent = source;
+                    Speaker speaker = player.AddSpeaker(
+                        MainSpeakerName,
+                        isSpatial: true,
+                        minDistance: 1f,
+                        maxDistance: 5000f);
+                    speaker.transform.parent = source;
+                    speaker.transform.localPosition = Vector3.zero;
+                });
+
+            AudioPlayers[name] = created;
+            return created;
+        }
+
+        private static AudioPlayer GetOrCreateGlobalAudioPlayer()
+        {
+            if (AudioPlayers.TryGetValue(GlobalAudioName, out AudioPlayer existing) && existing != null)
+                return existing;
+
+            AudioPlayer created = AudioPlayer.CreateOrGet(
+                "SCPS - Global",
+                condition: hub => Player.Get(hub) != null,
+                onIntialCreation: audio =>
+                {
+                    audio.AddSpeaker(
+                        MainSpeakerName,
+                        isSpatial: false,
+                        minDistance: 0f,
+                        maxDistance: 5000f);
+                });
+
+            AudioPlayers[GlobalAudioName] = created;
+            return created;
         }
 
         public static void HideFromList(ReferenceHub PlayerDummy)
@@ -73,41 +166,50 @@ namespace SCPS
             mouseLook.ApplySyncValues(horizontal, vertical);
         }
 
+        public static void Rotate(ReferenceHub npc, Quaternion rotation)
+        {
+            if (!(npc?.roleManager.CurrentRole is FpcStandardRoleBase role))
+                return;
+            FpcMouseLook mouseLook = role.FpcModule.MouseLook;
+            (ushort horizontal, ushort vertical) = rotation.ToClientUShorts();
+            mouseLook.ApplySyncValues(horizontal, vertical);
+        }
+
+        public static void Place(ReferenceHub npc, ScpsLocation location)
+        {
+            if (npc == null || location == null)
+                return;
+            npc.TryOverridePosition(location.Position);
+            Rotate(npc, location.Quaternion);
+        }
+
+        public static void Place(Player player, ScpsLocation location)
+        {
+            if (player == null || location == null)
+                return;
+            player.Position = location.Position;
+            player.Rotation = location.Quaternion;
+        }
+
+        public static ReferenceHub Spawn(RoleTypeId role, ScpsLocation location)
+        {
+            if (location == null)
+                return null;
+            Npc npc = Npc.Spawn(role.ToString(), role, ignored: true, position: location.Position);
+            if (npc?.ReferenceHub != null)
+                Rotate(npc.ReferenceHub, location.Quaternion);
+            return npc?.ReferenceHub;
+        }
+
         public static ReferenceHub Spawn(RoleTypeId role, Vector3 pos)
         {
-            GameObject gameObject = UnityEngine.Object.Instantiate<GameObject>(NetworkManager.singleton.playerPrefab);
-            ReferenceHub hub = gameObject.GetComponent<ReferenceHub>();
-            try
-            {
-                hub.roleManager.InitializeNewRole(RoleTypeId.None, RoleChangeReason.None, RoleSpawnFlags.All, null);
-            }
-            catch { }
-            int id = new RecyclablePlayerId(true).Value;
-            FakeConnection fakeConnection = new FakeConnection(id);
-            NetworkServer.AddPlayerForConnection(fakeConnection, gameObject);
-            Timing.CallDelayed(0.25f, () =>
-            {
-                try
-                {
-                    hub.roleManager.ServerSetRole(role, RoleChangeReason.RemoteAdmin, RoleSpawnFlags.All);
-                }
-                catch { }
-            });
-            Timing.CallDelayed(0.35f, () =>
-            {
-                // hub.nicknameSync.DisplayName = role.ToString();
-                hub.nicknameSync.Network_myNickSync = role.ToString();
-                string name = "ID_Dedicated";
-                hub.authManager.UserId = name;
-                hub.authManager.NetworkSyncedUserId = name;
-                hub.TryOverridePosition(pos + Vector3.up * 1.5f, Vector3.zero);
-            });
-            Npc npc = new Npc(gameObject)
-            {
-                IsNPC = true,
-            };
-            Player.Dictionary.Add(gameObject, npc);
-            return hub;
+            Npc npc = Npc.Spawn(
+                role.ToString(),
+                role,
+                ignored: true,
+                position: pos + Vector3.up * 1.5f);
+
+            return npc?.ReferenceHub;
         }
 
         public static void Register(ReferenceHub Chracters, string Name)
@@ -118,7 +220,10 @@ namespace SCPS
                 SCPS.Instance.Chracters.Add(chracters);
                 HideFromList(Chracters);
             }
-            catch (Exception ex) { }
+            catch (Exception ex)
+            {
+                Log.Error($"[SCPS] Failed to register character '{Name}': {ex}");
+            }
         }
 
         public static Player PlayerGet(string Name)

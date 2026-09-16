@@ -1,3 +1,44 @@
+# Build outputs
+[Bb]in/
+[Oo]bj/
+[Dd]ebug/
+[Rr]elease/
+x64/
+x86/
+artifacts/
+packages/
 
-*.vsidx
-*.vsidx
+# Visual Studio and IDE state
+.vs/
+.idea/
+.vscode/
+*.suo
+*.user
+*.rsuser
+*.userosscache
+*.sln.docstates
+*.sln.iml
+*.code-workspace
+
+# Build and test artifacts
+*.dll
+*.exe
+*.pdb
+*.cache
+*.log
+*.tlog
+*.binlog
+*.nupkg
+*.snupkg
+[Tt]est[Rr]esult*/
+BenchmarkDotNet.Artifacts/
+
+# Local dependency folders and machine-specific overrides
+EXILED_REFERENCES/
+Directory.Build.user.props
+
+# OS/editor files
+.DS_Store
+Thumbs.db
+~$*
+*~
